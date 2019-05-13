@@ -6,6 +6,7 @@ verify_ssl = true
 [dev-packages]
 ipykernel = "*"
 remote-ikernel = "*"
+pytest = "*"
 
 [packages]
 psutil = "*"
