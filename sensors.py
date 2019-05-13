@@ -33,6 +33,18 @@ def ac_connected():
     return psutil.sensors_battery().power_plugged
 
 
+def get_relative_humidity():
+    try:
+        # Connect to a DHT22 sensor on pin 4
+        from adafruit_dht import DHT22
+        from board import D4
+    except (ImportError, NotImplementedError):
+        # No DHT library results in an ImportError.
+        # Running on an unknown platform results in a NotImplementedError when getting the pin
+        return None
+    return DHT22(D4).humidity
+
+
 @click.command(help="Displays the values of the sensors")
 def show_sensors():
     click.echo("Python version: {0.major}.{0.minor}".format(python_version()))
@@ -41,6 +53,7 @@ def show_sensors():
     click.echo("CPU Load: {:.1%}".format(cpu_load()))
     click.echo("RAM Available: {:.0f} MiB".format(ram_available() / 1024**2))
     click.echo("AC Connected: {!r}".format(ac_connected()))
+    click.echo("Humidity: {!r}".format(get_relative_humidity()))
 
 
 if __name__ == '__main__':
