@@ -10,5 +10,7 @@ remote-ikernel = "*"
 [packages]
 psutil = "*"
 click = "*"
+adafruit-circuitpython-dht = {markers = "'arm' in platform_machine",version = "*"}
+sysv-ipc = {markers = "platform_machine == 'armv61' and platform_system == 'Linux'",version = "*"}
 
 [requires]
