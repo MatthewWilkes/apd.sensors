@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+import math
 import socket
 import sys
 
@@ -7,53 +8,168 @@ import click
 import psutil
 
 
-def python_version():
-    return sys.version_info
+class PythonVersion:
+    title = "Python Version"
+
+    def value(self):
+        return sys.version_info
+
+    @classmethod
+    def format(cls, value):
+        return "{0.major}.{0.minor}".format(value)
+
+    def __str__(self):
+        return self.format(self.value())
 
 
-def ip_addresses():
-    hostname = socket.gethostname()
-    addresses = socket.getaddrinfo(socket.gethostname(), None)
+class IPAddresses:
+    title = "IP Addresses"
 
-    address_info = []
-    for address in addresses:
-        address_info.append((address[0].name, address[4][0]))
-    return address_info
+    def value(self):
+        hostname = socket.gethostname()
+        addresses = socket.getaddrinfo(hostname, None)
+
+        address_info = []
+        for address in addresses:
+            value = (address[0].name, address[4][0])
+            if value not in address_info:
+                address_info.append(value)
+        return address_info
+
+    @classmethod
+    def format(cls, value):
+        return "\n".join(
+            "{0[1]} ({0[0]})".format(address)
+            for address in value
+        )
+
+    def __str__(self):
+        return self.format(self.value())
 
 
-def cpu_load():
-    return psutil.cpu_percent(interval=0.1) / 100
+class CPULoad:
+    title = "CPU Usage"
+
+    def value(self):
+        return psutil.cpu_percent(interval=3) / 100.0
+
+    @classmethod
+    def format(cls, value):
+        return "{:.1%}".format(value)
+
+    def __str__(self):
+        return self.format(self.value())
 
 
-def ram_available():
-    return psutil.virtual_memory().available
+class RAMAvailable:
+    title = "RAM Available"
+    UNITS = ('KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB')
+    UNIT_SIZE = 2**10
+
+    def value(self):
+        return psutil.virtual_memory().available
+
+    @classmethod
+    def format(cls, value):
+        magnitude = math.floor(math.log(value, cls.UNIT_SIZE))
+        max_magnitude = len(cls.UNITS)
+        magnitude = min(magnitude, max_magnitude)
+        scaled_value = value / cls.UNIT_SIZE ** magnitude
+
+        return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude - 1])
+
+    def __str__(self):
+        return self.format(self.value())
 
 
-def ac_connected():
-    return psutil.sensors_battery().power_plugged
+class ACStatus:
+    title = "AC Connected"
+
+    def value(self):
+        battery = psutil.sensors_battery()
+        if battery is not None:
+            return battery.power_plugged
+        else:
+            return None
+
+    @classmethod
+    def format(cls, value):
+        if value is None:
+            return "Unknown"
+        elif value:
+            return "Connected"
+        else:
+            return "Not connected"
+
+    def __str__(self):
+        return self.format(self.value())
 
 
-def get_relative_humidity():
-    try:
-        # Connect to a DHT22 sensor on pin 4
-        from adafruit_dht import DHT22
-        from board import D4
-    except (ImportError, NotImplementedError):
-        # No DHT library results in an ImportError.
-        # Running on an unknown platform results in a NotImplementedError when getting the pin
-        return None
-    return DHT22(D4).humidity
+class Temperature:
+    title = "Ambient Temperature"
+
+    def value(self):
+        try:
+            # Connect to a DHT22 on pin 4
+            from adafruit_dht import DHT22
+            from board import D4
+        except (ImportError, NotImplementedError):
+            # No DHT library results in an ImportError.
+            # Running on an unknown platform results in a NotImplementedError when getting the pin
+            return None
+        try:
+            return DHT22(D4).temperature
+        except RuntimeError:
+            return None
+
+    @staticmethod
+    def celsius_to_fahrenheit(value: float) -> float:
+        return value * 9 / 5 + 32
+
+    @classmethod
+    def format(cls, value):
+        if value is None:
+            return "Unknown"
+        else:
+            return "{:.1}C ({:.1}F)".format(value, self.celsius_to_fahrenheit(value))
+
+    def __str__(self):
+        return self.format(self.value())
+
+class RelativeHumidity:
+    title = "Relative Humidity"
+
+    def value(self):
+        try:
+            # Connect to a DHT22 on pin 4
+            from adafruit_dht import DHT22
+            from board import D4
+        except (ImportError, NotImplementedError):
+            # No DHT library results in an ImportError.
+            # Running on an unknown platform results in a NotImplementedError when getting the pin
+            return None
+        try:
+            return DHT22(D4).humidity / 100
+        except RuntimeError:
+            return None
+
+    @classmethod
+    def format(cls, value):
+        if value is None:
+            return "Unknown"
+        else:
+            return "{:.1%}".format(value)
+
+    def __str__(self):
+        return self.format(self.value())
 
 
 @click.command(help="Displays the values of the sensors")
 def show_sensors():
-    click.echo("Python version: {0.major}.{0.minor}".format(python_version()))
-    for address in ip_addresses():
-        click.echo("IP addresses: {0[1]} ({0[0]})".format(address))
-    click.echo("CPU Load: {:.1%}".format(cpu_load()))
-    click.echo("RAM Available: {:.0f} MiB".format(ram_available() / 1024**2))
-    click.echo("AC Connected: {!r}".format(ac_connected()))
-    click.echo("Humidity: {!r}".format(get_relative_humidity()))
+    for sensor in [PythonVersion(), IPAddresses(), CPULoad(), RAMAvailable(), ACStatus(), Temperature(), RelativeHumidity()]:
+        click.secho(sensor.title, bold=True)
+        click.echo(sensor)
+        click.echo("")
 
 
 if __name__ == '__main__':
