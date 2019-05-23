@@ -16,6 +16,8 @@ class PythonVersion:
 
     @classmethod
     def format(cls, value):
+        if value.micro == 0 and value.releaselevel == "alpha":
+            return "{0.major}.{0.minor}.{0.micro}a{0.serial}".format(value)
         return "{0.major}.{0.minor}".format(value)
 
     def __str__(self):
