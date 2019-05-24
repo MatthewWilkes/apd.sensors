@@ -6,11 +6,15 @@ from sensors import IPAddresses
 import pytest
 
 
+@pytest.fixture
+def sensor():
+    return IPAddresses()
+
 class TestIPAddressFormatter:
 
     @pytest.fixture
-    def subject(self):
-        return IPAddresses().format
+    def subject(self, sensor):
+        return sensor.format
 
     def test_format_single_ipv4(self, subject):
         ips = [
@@ -39,10 +43,6 @@ class TestIPAddressFormatter:
 
 
 class TestIPAddressesValue:
-
-    @pytest.fixture
-    def sensor(self):
-        return IPAddresses()
 
     @pytest.fixture
     def subject(self, sensor):
