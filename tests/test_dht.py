@@ -26,6 +26,9 @@ class TestTemperatureFormatter:
     def test_format_negative(self, subject):
         assert subject(-32.0) == "-32.0C (-25.6F)"
 
+    def test_format_unknown(self, subject):
+        assert subject(None) == "Unknown"
+
 
 class TestTemperatureConversion:
 
@@ -62,3 +65,5 @@ class TestHumidityFormatter:
     def test_format_percentage(self, subject):
         assert subject(0.035) == "3.5%"
 
+    def test_format_unknown(self, subject):
+        assert subject(None) == "Unknown"
