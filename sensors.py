@@ -26,6 +26,10 @@ class PythonVersion:
 
 class IPAddresses:
     title = "IP Addresses"
+    FAMILIES = {
+        "AF_INET": "IPv4",
+        "AF_INET6": "IPv6",
+    }
 
     def value(self):
         hostname = socket.gethostname()
@@ -40,7 +44,10 @@ class IPAddresses:
 
     @classmethod
     def format(cls, value):
-        return "\n".join("{0[1]} ({0[0]})".format(address) for address in value)
+        return "\n".join(
+            "{0} ({1})".format(address[1], cls.FAMILIES.get(address[0], "Unknown"))
+            for address in value
+        )
 
     def __str__(self):
         return self.format(self.value())
@@ -62,7 +69,7 @@ class CPULoad:
 
 class RAMAvailable:
     title = "RAM Available"
-    UNITS = ("KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
+    UNITS = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
     UNIT_SIZE = 2 ** 10
 
     def value(self):
@@ -71,11 +78,11 @@ class RAMAvailable:
     @classmethod
     def format(cls, value):
         magnitude = math.floor(math.log(value, cls.UNIT_SIZE))
-        max_magnitude = len(cls.UNITS)
+        max_magnitude = len(cls.UNITS) - 1
         magnitude = min(magnitude, max_magnitude)
         scaled_value = value / cls.UNIT_SIZE ** magnitude
 
-        return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude - 1])
+        return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude])
 
     def __str__(self):
         return self.format(self.value())
@@ -130,7 +137,7 @@ class Temperature:
         if value is None:
             return "Unknown"
         else:
-            return "{:.1}C ({:.1}F)".format(value, self.celsius_to_fahrenheit(value))
+            return "{:.1f}C ({:.1f}F)".format(value, cls.celsius_to_fahrenheit(value))
 
     def __str__(self):
         return self.format(self.value())
