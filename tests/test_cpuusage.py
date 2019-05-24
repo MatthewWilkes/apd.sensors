@@ -6,10 +6,15 @@ from sensors import CPULoad
 import pytest
 
 
+@pytest.fixture
+def sensor():
+    return CPULoad()
+
+
 class TestCPULoadFormatter:
     @pytest.fixture
-    def subject(self):
-        return CPULoad().format
+    def subject(self, sensor):
+        return sensor.format
 
     def test_format_simple_percentage(self, subject):
         assert subject(0.05) == "5.0%"
@@ -19,10 +24,6 @@ class TestCPULoadFormatter:
 
 
 class TestCPULoadValue:
-    @pytest.fixture
-    def sensor(self):
-        return CPULoad()
-
     @pytest.fixture
     def subject(self, sensor):
         return sensor.value

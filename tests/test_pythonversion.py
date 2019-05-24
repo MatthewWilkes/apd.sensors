@@ -13,10 +13,15 @@ def version():
     )
 
 
+@pytest.fixture
+def sensor():
+    return PythonVersion()
+
+
 class TestPythonVersionFormatter:
     @pytest.fixture
-    def subject(self):
-        return PythonVersion().format
+    def subject(self, sensor):
+        return sensor.format
 
     def test_format_py38(self, subject, version):
         py38 = version(3, 8, 0, "final", 0)
@@ -37,8 +42,8 @@ class TestPythonVersionFormatter:
 
 class TestPythonVersionValue:
     @pytest.fixture
-    def subject(self):
-        return PythonVersion().value
+    def subject(self, sensor):
+        return sensor.value
 
     @pytest.fixture
     def python_version(self):
@@ -51,10 +56,6 @@ class TestPythonVersionValue:
 
 
 class TestPythonVersionSensor:
-    @pytest.fixture
-    def subject(self):
-        return PythonVersion()
-
-    def test_str_representation_is_formatted_value(self, subject, version):
+    def test_str_representation_is_formatted_value(self, sensor, version):
         with mock.patch("sys.version_info", new=version(3, 4, 1, "final", 1)):
-            assert str(subject) == "3.4"
+            assert str(sensor) == "3.4"
