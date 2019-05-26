@@ -22,6 +22,9 @@ class TestCPULoadFormatter:
     def test_format_multiple_decimal_places(self, subject):
         assert subject(0.031415926) == "3.1%"
 
+    def test_format_multiple_decimal_places_int(self, subject) -> None:
+        assert subject(1) == "100.0%"
+
 
 class TestCPULoadValue:
 
