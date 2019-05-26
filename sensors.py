@@ -37,7 +37,10 @@ class IPAddresses:
 
         address_info = []
         for address in addresses:
-            value = (address[0].name, address[4][0])
+            family, ip = (address[0].name, address[4][0])
+            if family not in self.FAMILIES:
+                continue
+            value = (family, ip)
             if value not in address_info:
                 address_info.append(value)
         return address_info
@@ -80,8 +83,7 @@ class RAMAvailable:
         magnitude = math.floor(math.log(value, cls.UNIT_SIZE))
         max_magnitude = len(cls.UNITS) -1
         magnitude = min(magnitude, max_magnitude)
-        scaled_value = value / cls.UNIT_SIZE ** magnitude
-
+        scaled_value = value / (cls.UNIT_SIZE ** magnitude)
         return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude])
 
     def __str__(self):
