@@ -3,9 +3,27 @@
 import math
 import socket
 import sys
+from typing import Optional, List, Tuple, Iterable, TypeVar, Generic
+
 
 import click
 import psutil
+
+
+T_value = TypeVar("T_value")
+
+class Sensor(Generic[T_value]):
+    title: str
+
+    def value(self) -> T_value:
+        raise NotImplementedError
+
+    @classmethod
+    def format(cls, value: T_value) -> str:
+        raise NotImplementedError
+
+    def __str__(self) -> str:
+        return self.format(self.value())
 
 
 class PythonVersion:

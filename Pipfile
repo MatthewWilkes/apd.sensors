@@ -7,6 +7,8 @@ verify_ssl = true
 ipykernel = "*"
 remote-ikernel = "*"
 pytest = "*"
+pytest-cov = "*"
+mypy = "*"
 
 [packages]
 psutil = "*"
