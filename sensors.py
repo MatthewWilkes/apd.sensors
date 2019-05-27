@@ -124,7 +124,8 @@ class Temperature(Sensor[Optional[float]]):
             from board import D4
         except (ImportError, NotImplementedError):
             # No DHT library results in an ImportError.
-            # Running on an unknown platform results in a NotImplementedError when getting the pin
+            # Running on an unknown platform results in a
+            # NotImplementedError when getting the pin
             return None
         try:
             return DHT22(D4).temperature
@@ -156,7 +157,8 @@ class RelativeHumidity(Sensor[Optional[float]]):
             from board import D4
         except (ImportError, NotImplementedError):
             # No DHT library results in an ImportError.
-            # Running on an unknown platform results in a NotImplementedError when getting the pin
+            # Running on an unknown platform results in a
+            # NotImplementedError when getting the pin
             return None
         try:
             return DHT22(D4).humidity / 100

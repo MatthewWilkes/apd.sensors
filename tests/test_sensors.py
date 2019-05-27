@@ -1,5 +1,3 @@
-import sys
-
 from click.testing import CliRunner
 import pytest
 
