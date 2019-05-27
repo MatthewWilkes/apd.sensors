@@ -3,7 +3,7 @@
 import math
 import socket
 import sys
-from typing import Optional, List, Tuple, Iterable, TypeVar, Generic
+from typing import Any, Optional, List, Tuple, Iterable, TypeVar, Generic
 
 
 import click
@@ -27,7 +27,7 @@ class Sensor(Generic[T_value]):
         return self.format(self.value())
 
 
-class PythonVersion:
+class PythonVersion(Sensor[Any]):
     title = "Python Version"
 
     def value(self):
@@ -39,11 +39,8 @@ class PythonVersion:
             return "{0.major}.{0.minor}.{0.micro}a{0.serial}".format(value)
         return "{0.major}.{0.minor}".format(value)
 
-    def __str__(self):
-        return self.format(self.value())
 
-
-class IPAddresses:
+class IPAddresses(Sensor[Iterable[Tuple[str, str]]]):
     title = "IP Addresses"
     FAMILIES = {
         "AF_INET": "IPv4",
@@ -54,7 +51,7 @@ class IPAddresses:
         hostname = socket.gethostname()
         addresses = socket.getaddrinfo(hostname, None)
 
-        address_info = []
+        address_info: List[Tuple[str, str]] = []
         for address in addresses:
             family, ip = (address[0].name, address[4][0])
             if family not in self.FAMILIES:
@@ -71,11 +68,8 @@ class IPAddresses:
             for address in value
         )
 
-    def __str__(self):
-        return self.format(self.value())
 
-
-class CPULoad:
+class CPULoad(Sensor[float]):
     title = "CPU Usage"
 
     def value(self):
@@ -85,11 +79,8 @@ class CPULoad:
     def format(cls, value):
         return "{:.1%}".format(value)
 
-    def __str__(self):
-        return self.format(self.value())
 
-
-class RAMAvailable:
+class RAMAvailable(Sensor[int]):
     title = "RAM Available"
     UNITS = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
     UNIT_SIZE = 2 ** 10
@@ -105,11 +96,8 @@ class RAMAvailable:
         scaled_value = value / (cls.UNIT_SIZE ** magnitude)
         return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude])
 
-    def __str__(self):
-        return self.format(self.value())
 
-
-class ACStatus:
+class ACStatus(Sensor[Optional[bool]]):
     title = "AC Connected"
 
     def value(self):
@@ -128,11 +116,8 @@ class ACStatus:
         else:
             return "Not connected"
 
-    def __str__(self):
-        return self.format(self.value())
 
-
-class Temperature:
+class Temperature(Sensor[Optional[float]]):
     title = "Ambient Temperature"
 
     def value(self):
@@ -164,7 +149,7 @@ class Temperature:
         return self.format(self.value())
 
 
-class RelativeHumidity:
+class RelativeHumidity(Sensor[Optional[float]]):
     title = "Relative Humidity"
 
     def value(self):
@@ -188,13 +173,9 @@ class RelativeHumidity:
         else:
             return "{:.1%}".format(value)
 
-    def __str__(self):
-        return self.format(self.value())
 
-
-@click.command(help="Displays the values of the sensors")
-def show_sensors():
-    for sensor in [
+def get_sensors():
+    return [
         PythonVersion(),
         IPAddresses(),
         CPULoad(),
@@ -202,9 +183,15 @@ def show_sensors():
         ACStatus(),
         Temperature(),
         RelativeHumidity(),
-    ]:
+    ]
+
+
+@click.command(help="Displays the values of the sensors")
+def show_sensors():
+    sensors = get_sensors()
+    for sensor in sensors:
         click.secho(sensor.title, bold=True)
-        click.echo(sensor)
+        click.echo(str(sensor))
         click.echo("")
 
 
