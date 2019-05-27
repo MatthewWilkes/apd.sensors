@@ -9,6 +9,8 @@ remote-ikernel = "*"
 pytest = "*"
 pytest-cov = "*"
 mypy = "*"
+flake8 = "*"
+black = "*"
 
 [packages]
 psutil = "*"
@@ -17,3 +19,6 @@ adafruit-circuitpython-dht = {markers = "'arm' in platform_machine",version = "*
 sysv-ipc = {markers = "platform_machine == 'armv61' and platform_system == 'Linux'",version = "*"}
 
 [requires]
+
+[pipenv]
+allow_prereleases = true
