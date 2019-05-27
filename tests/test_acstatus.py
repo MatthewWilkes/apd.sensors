@@ -1,5 +1,4 @@
 from unittest import mock
-import socket
 
 from sensors import ACStatus
 
@@ -38,17 +37,17 @@ class TestACStatusValue:
 
     def test_sensors_battery_called(self, subject, sensors_battery):
         sensors_battery.return_value.power_plugged = True
-        assert subject() == True
+        assert subject() is True
         assert sensors_battery.call_count == 1
 
     def test_sensor_but_battery_unknown(self, subject, sensors_battery):
         sensors_battery.return_value.power_plugged = None
-        assert subject() == None
+        assert subject() is None
         assert sensors_battery.call_count == 1
 
     def test_no_sensor(self, subject, sensors_battery):
         sensors_battery.return_value = None
-        assert subject() == None
+        assert subject() is None
 
     def test_str_representation_is_formatted_value(self, sensor, sensors_battery):
         sensors_battery.return_value.power_plugged = True

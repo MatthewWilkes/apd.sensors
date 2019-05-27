@@ -1,5 +1,3 @@
-import socket
-
 from sensors import Temperature, RelativeHumidity
 
 import pytest
@@ -53,7 +51,7 @@ class TestTemperatureConversion:
     def test_celsius_to_fahrenheit_string(self, subject):
         c = "21"
         with pytest.raises(TypeError):
-            f = subject(c)
+            subject(c)
 
 
 class TestHumidityFormatter:
