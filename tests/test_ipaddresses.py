@@ -51,9 +51,7 @@ class TestIPAddressesValue:
 
     def test_getaddrinfo_used_for_value_collection(self, getaddrinfo, subject):
         getaddrinfo.return_value = [(socket.AF_INET, 0, 0, "", ("192.0.2.1", 0))]
-        assert subject() == [
-            ("AF_INET", "192.0.2.1"),
-        ]
+        assert subject() == [("AF_INET", "192.0.2.1")]
         assert getaddrinfo.call_count == 1
 
     def test_str_representation_is_formatted_value(self, getaddrinfo, sensor):

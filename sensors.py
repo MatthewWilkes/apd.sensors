@@ -42,10 +42,7 @@ class PythonVersion(Sensor[Any]):
 
 class IPAddresses(Sensor[Iterable[Tuple[str, str]]]):
     title = "IP Addresses"
-    FAMILIES = {
-        "AF_INET": "IPv4",
-        "AF_INET6": "IPv6",
-    }
+    FAMILIES = {"AF_INET": "IPv4", "AF_INET6": "IPv6"}
 
     def value(self):
         hostname = socket.gethostname()
