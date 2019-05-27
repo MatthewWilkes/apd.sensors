@@ -5,9 +5,13 @@ from sensors import PythonVersion
 
 import pytest
 
+
 @pytest.fixture
 def version():
-    return namedtuple("sys_versioninfo", ("major", "minor", "micro", "releaselevel", "serial"))
+    return namedtuple(
+        "sys_versioninfo", ("major", "minor", "micro", "releaselevel", "serial")
+    )
+
 
 @pytest.fixture
 def sensor():
@@ -15,7 +19,6 @@ def sensor():
 
 
 class TestPythonVersionFormatter:
-
     @pytest.fixture
     def subject(self, sensor):
         return sensor.format
@@ -38,7 +41,6 @@ class TestPythonVersionFormatter:
 
 
 class TestPythonVersionValue:
-
     @pytest.fixture
     def subject(self, sensor):
         return sensor.value
@@ -46,6 +48,7 @@ class TestPythonVersionValue:
     @pytest.fixture
     def python_version(self):
         import sys
+
         return sys.version_info
 
     def test_data_value_is_sys_versioninfo(self, python_version, subject):
@@ -53,8 +56,6 @@ class TestPythonVersionValue:
 
 
 class TestPythonVersionSensor:
-
     def test_str_representation_is_formatted_value(self, sensor, version):
         with mock.patch("sys.version_info", new=version(3, 4, 1, "final", 1)):
             assert str(sensor) == "3.4"
-

@@ -12,6 +12,7 @@ import psutil
 
 T_value = TypeVar("T_value")
 
+
 class Sensor(Generic[T_value]):
     title: str
 
@@ -41,10 +42,7 @@ class PythonVersion(Sensor[Any]):
 
 class IPAddresses(Sensor[Iterable[Tuple[str, str]]]):
     title = "IP Addresses"
-    FAMILIES = {
-        "AF_INET": "IPv4",
-        "AF_INET6": "IPv6",
-    }
+    FAMILIES = {"AF_INET": "IPv4", "AF_INET6": "IPv6"}
 
     def value(self) -> List[Tuple[str, str]]:
         hostname = socket.gethostname()
@@ -81,8 +79,8 @@ class CPULoad(Sensor[float]):
 
 class RAMAvailable(Sensor[int]):
     title = "RAM Available"
-    UNITS = ('B', 'KiB', 'MiB', 'GiB', 'TiB', 'PiB', 'EiB')
-    UNIT_SIZE = 2**10
+    UNITS = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
+    UNIT_SIZE = 2 ** 10
 
     def value(self) -> int:
         return psutil.virtual_memory().available
@@ -90,7 +88,7 @@ class RAMAvailable(Sensor[int]):
     @classmethod
     def format(cls, value: int) -> str:
         magnitude = math.floor(math.log(value, cls.UNIT_SIZE))
-        max_magnitude = len(cls.UNITS) -1
+        max_magnitude = len(cls.UNITS) - 1
         magnitude = min(magnitude, max_magnitude)
         scaled_value = value / (cls.UNIT_SIZE ** magnitude)
         return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude])
@@ -146,6 +144,7 @@ class Temperature(Sensor[Optional[float]]):
     def __str__(self) -> str:
         return self.format(self.value())
 
+
 class RelativeHumidity(Sensor[Optional[float]]):
     title = "Relative Humidity"
 
@@ -171,7 +170,15 @@ class RelativeHumidity(Sensor[Optional[float]]):
 
 
 def get_sensors() -> Iterable[Sensor[Any]]:
-    return [PythonVersion(), IPAddresses(), CPULoad(), RAMAvailable(), ACStatus(), Temperature(), RelativeHumidity()]
+    return [
+        PythonVersion(),
+        IPAddresses(),
+        CPULoad(),
+        RAMAvailable(),
+        ACStatus(),
+        Temperature(),
+        RelativeHumidity(),
+    ]
 
 
 @click.command(help="Displays the values of the sensors")
@@ -181,7 +188,7 @@ def show_sensors() -> None:
         click.secho(sensor.title, bold=True)
         click.echo(str(sensor))
         click.echo("")
-    
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     show_sensors()
