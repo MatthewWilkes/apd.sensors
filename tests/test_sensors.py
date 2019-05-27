@@ -7,7 +7,8 @@ import sensors
 
 
 def test_sensors():
-    assert hasattr(sensors, 'PythonVersion')
+    assert hasattr(sensors, "PythonVersion")
+
 
 @pytest.mark.functional
 def test_python_version_is_first_two_lines_of_cli_output():

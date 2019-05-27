@@ -5,13 +5,13 @@ from sensors import ACStatus
 
 import pytest
 
+
 @pytest.fixture
 def sensor():
     return ACStatus()
 
 
 class TestACStatusFormatter:
-
     @pytest.fixture
     def subject(self, sensor):
         return sensor.format
@@ -27,7 +27,6 @@ class TestACStatusFormatter:
 
 
 class TestACStatusValue:
-
     @pytest.fixture
     def subject(self, sensor):
         return sensor.value
@@ -55,4 +54,3 @@ class TestACStatusValue:
         sensors_battery.return_value.power_plugged = True
         assert str(sensor) == "Connected"
         assert sensors_battery.call_count == 1
-

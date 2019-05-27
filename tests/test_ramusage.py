@@ -5,13 +5,13 @@ from sensors import RAMAvailable
 
 import pytest
 
+
 @pytest.fixture
 def sensor():
     return RAMAvailable()
 
 
 class TestRAMAvailableFormatter:
-
     @pytest.fixture
     def subject(self, sensor):
         return sensor.format
@@ -29,9 +29,7 @@ class TestRAMAvailableFormatter:
         assert subject(15000000000) == "14.0 GiB"
 
 
-
 class TestRAMAvailableValue:
-
     @pytest.fixture
     def subject(self, sensor):
         return sensor.value
@@ -45,7 +43,6 @@ class TestRAMAvailableValue:
     def test_virtual_memory_called(self, subject, virtual_memory):
         assert subject() == 1024
         assert virtual_memory.call_count == 1
-        
+
     def test_str_representation_is_formatted_value(self, sensor, virtual_memory):
         assert str(sensor) == "1.0 KiB"
-
