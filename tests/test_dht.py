@@ -5,9 +5,11 @@ from sensors import Temperature, RelativeHumidity
 
 import pytest
 
+
 @pytest.fixture
 def temperature_sensor():
     return Temperature()
+
 
 @pytest.fixture
 def humidity_sensor():
@@ -15,7 +17,6 @@ def humidity_sensor():
 
 
 class TestTemperatureFormatter:
-
     @pytest.fixture
     def subject(self, temperature_sensor):
         return temperature_sensor.format
@@ -31,7 +32,6 @@ class TestTemperatureFormatter:
 
 
 class TestTemperatureConversion:
-
     @pytest.fixture
     def subject(self, temperature_sensor):
         return temperature_sensor.celsius_to_fahrenheit
@@ -56,8 +56,8 @@ class TestTemperatureConversion:
         with pytest.raises(TypeError):
             f = subject(c)
 
-class TestHumidityFormatter:
 
+class TestHumidityFormatter:
     @pytest.fixture
     def subject(self, humidity_sensor):
         return humidity_sensor.format

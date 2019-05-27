@@ -10,8 +10,8 @@ import pytest
 def sensor():
     return CPULoad()
 
-class TestCPULoadFormatter:
 
+class TestCPULoadFormatter:
     @pytest.fixture
     def subject(self, sensor):
         return sensor.format
@@ -27,7 +27,6 @@ class TestCPULoadFormatter:
 
 
 class TestCPULoadValue:
-
     @pytest.fixture
     def subject(self, sensor):
         return sensor.value
@@ -42,7 +41,6 @@ class TestCPULoadValue:
         assert subject() == 0.501
         assert cpuload.call_count == 1
         assert tuple(cpuload.call_args) == ((), {"interval": 3})
-        
+
     def test_str_representation_is_formatted_value(self, sensor, cpuload):
         assert str(sensor) == "50.1%"
-
