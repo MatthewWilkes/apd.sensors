@@ -16,6 +16,7 @@ pytest-cov = "*"
 mypy = "*"
 flake8 = "*"
 black = "*"
+pre-commit = "*"
 
 [packages]
 psutil = "*"
