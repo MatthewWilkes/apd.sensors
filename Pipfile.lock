@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "dc6b16a186d74151aa65d0ce9f7329be35608577734e5657c962d26b3dacc2c0"
+            "sha256": "2012747be439758ebeec226fa45fb4221af00835ff02c1ffaddd8cf05405bc9d"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -19,42 +19,15 @@
         ]
     },
     "default": {
-        "adafruit-blinka": {
-            "hashes": [
-                "sha256:375a71854a52779a760c5b2f53f626c9217b523b77ac1c4648ee81c606ce4eec",
-                "sha256:dbd25293944e118bec49ef0763b51cda8445b7a8cb49e8d39934f01551820cc5"
-            ],
-            "version": "==4.2.0"
-        },
-        "adafruit-circuitpython-dht": {
-            "hashes": [
-                "sha256:454b506bab88a009ea19aa1ea00338dffe1d48fb42ab2c3e03948bf337a5542c",
-                "sha256:5f9307fbfad64221ba1a4e7b34ecbf26326a5d77a856482361bef70c251df55d"
-            ],
-            "index": "pypi",
-            "markers": "'arm' in platform_machine",
-            "version": "==3.3.0"
-        },
-        "adafruit-platformdetect": {
-            "hashes": [
-                "sha256:917f431371f94a60391e881fe1af3731a225b188e0c0157ebc69b877f1fd0a2a",
-                "sha256:bf446f8365cdf0a87d4bf6620e70bd59da99b0523c2111f0dc74a1155236ff61"
-            ],
-            "version": "==2.5.0"
-        },
-        "adafruit-pureio": {
-            "hashes": [
-                "sha256:013ebe6119eaaa0d39716ea5fbfad4fcbada7c88eaebcc7d6615f9df44e53b8c",
-                "sha256:b67587ed3c4dc90bd0e9b988587efa66b4466abf71eb0dcbcd4695e7e4350326"
-            ],
-            "version": "==1.0.4"
+        "apd-sensors": {
+            "editable": true,
+            "path": "."
         },
         "click": {
             "hashes": [
                 "sha256:8a18b4ea89d8820c5d0c7da8a64b2c324b4dabb695804dbfea19b9be9d88c0cc",
                 "sha256:e345d143d80bf5ee7534056164e5e112ea5e22716bbb1ce727941f4c8b471b9a"
             ],
-            "index": "pypi",
             "version": "==7.1.1"
         },
         "psutil": {
@@ -74,50 +47,7 @@
                 "sha256:f344ca230dd8e8d5eee16827596f1c22ec0876127c28e800d7ae20ed44c4b310",
                 "sha256:f3e7f183162622eae9fbdee44ff19b226edec68b94ae7cba47f9afcf4c3ec66c"
             ],
-            "index": "pypi",
             "version": "==5.7.0"
-        },
-        "pyftdi": {
-            "hashes": [
-                "sha256:51827a876d0ed2b146d66083f7020a4ca1b703fca599da119e3a79009c89549c",
-                "sha256:a98e683b7e3569814524a4bdd723e8b239072da30366071a9266ab80083f2135",
-                "sha256:e781c9a4e6ad2ed6830e5b4aa3f1707efb781d3598493f0655c43c97d64afc63"
-            ],
-            "version": "==0.48.3"
-        },
-        "pyserial": {
-            "hashes": [
-                "sha256:6e2d401fdee0eab996cf734e67773a0143b932772ca8b42451440cfed942c627",
-                "sha256:e0770fadba80c31013896c7e6ef703f72e7834965954a78e71a3049488d4d7d8"
-            ],
-            "version": "==3.4"
-        },
-        "pyusb": {
-            "hashes": [
-                "sha256:4e9b72cc4a4205ca64fbf1f3fff39a335512166c151ad103e55c8223ac147362",
-                "sha256:789749b8a9bf3828c55d41df2c3e569739cd1bdbe1517e8d940af9587a711faa"
-            ],
-            "version": "==1.0.2"
-        },
-        "rpi-ws281x": {
-            "hashes": [
-                "sha256:185d7ae138a5633cf4cd707c55d7190b34810cc3f5e5682c820ddf1dade20914",
-                "sha256:265a395410cc7199f779c4209ca3970b7211896b86dbaa4731bdc3569d2e595f",
-                "sha256:544f09353ccb578452d0478470460d3425f40e8dd7433131a95239daeae83303",
-                "sha256:bc3a22e55c2a10de5c4dfb23c13dceff66162e77eb7176701f1a0d5ae8b97695",
-                "sha256:de182acceab047030056e2ab0dd2bd2632f2375f60d9a94cf7e3a8a4033834a0",
-                "sha256:f35e698e0d4205cb1bc2835b46429235fa22e973c8320d661f16556ceaf0f90b"
-            ],
-            "version": "==4.2.3"
-        },
-        "rpi.gpio": {
-            "hashes": [
-                "sha256:5cd2f3c88d0b1e2f4780c905702c0474768c2bc113fb793121c2e117b401ab16",
-                "sha256:6a4791f41cafc2ee6e4cb70e5bd31fadc66a0cfab29b38df8723a98f6f73ad5a",
-                "sha256:7424bc6c205466764f30f666c18187a0824077daf20b295c42f08aea2cb87d3f",
-                "sha256:7da5235aeba20da39ad4fb97f3ba3a2c6b2d60bba8958b00a4df42f608c6d42e"
-            ],
-            "version": "==0.7.0"
         }
     },
     "develop": {
@@ -178,7 +108,6 @@
                 "sha256:8a18b4ea89d8820c5d0c7da8a64b2c324b4dabb695804dbfea19b9be9d88c0cc",
                 "sha256:e345d143d80bf5ee7534056164e5e112ea5e22716bbb1ce727941f4c8b471b9a"
             ],
-            "index": "pypi",
             "version": "==7.1.1"
         },
         "colorama": {
