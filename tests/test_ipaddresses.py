@@ -1,7 +1,7 @@
 from unittest import mock
 import socket
 
-from sensors import IPAddresses
+from apd.sensors.sensors import IPAddresses
 
 import pytest
 

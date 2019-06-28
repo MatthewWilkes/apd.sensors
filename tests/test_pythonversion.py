@@ -1,7 +1,7 @@
 from collections import namedtuple
 from unittest import mock
 
-from sensors import PythonVersion
+from apd.sensors.sensors import PythonVersion
 
 import pytest
 

@@ -1,6 +1,6 @@
 from unittest import mock
 
-from sensors import ACStatus
+from apd.sensors.sensors import ACStatus
 
 import pytest
 

@@ -1,6 +1,6 @@
 from unittest import mock
 
-from sensors import RAMAvailable
+from apd.sensors.sensors import RAMAvailable
 
 import pytest
 

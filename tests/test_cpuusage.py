@@ -1,6 +1,6 @@
 from unittest import mock
 
-from sensors import CPULoad
+from apd.sensors.sensors import CPULoad
 
 import pytest
 
