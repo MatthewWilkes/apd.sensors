@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from sensors import RAMAvailable
+from apd.sensors.sensors import RAMAvailable
 
 
 @pytest.fixture
