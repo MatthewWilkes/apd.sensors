@@ -1,6 +1,6 @@
 import pytest
 
-from sensors import Temperature, RelativeHumidity
+from apd.sensors.sensors import Temperature, RelativeHumidity
 
 
 @pytest.fixture

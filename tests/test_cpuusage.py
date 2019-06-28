@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from sensors import CPULoad
+from apd.sensors.sensors import CPULoad
 
 
 @pytest.fixture

@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from sensors import PythonVersion
+from apd.sensors.sensors import PythonVersion
 
 
 @pytest.fixture

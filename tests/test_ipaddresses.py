@@ -3,7 +3,7 @@ from unittest import mock
 
 import pytest
 
-from sensors import IPAddresses
+from apd.sensors.sensors import IPAddresses
 
 
 @pytest.fixture

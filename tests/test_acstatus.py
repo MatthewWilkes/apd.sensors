@@ -2,7 +2,7 @@ from unittest import mock
 
 import pytest
 
-from sensors import ACStatus
+from apd.sensors.sensors import ACStatus
 
 
 @pytest.fixture
