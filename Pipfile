@@ -19,9 +19,7 @@ black = "*"
 pre-commit = "*"
 
 [packages]
-psutil = "*"
-click = "*"
-adafruit-circuitpython-dht = {markers = "'arm' in platform_machine",version = "*"}
+apd-sensors = {editable = true,path = "."}
 
 [requires]
 
