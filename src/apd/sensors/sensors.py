@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+import importlib
 import math
 import socket
 import sys
@@ -185,13 +186,53 @@ def get_sensors():
     ]
 
 
+RETURN_CODES = {"OK": 0, "BAD_SENSOR_PATH": 17}
+
+
+def get_sensor_by_path(sensor_path):
+    try:
+        module_name, sensor_name = sensor_path.split(":")
+    except ValueError:
+        raise RuntimeError(
+            "Sensor path must be in the format dotted.path.to.module:ClassName"
+        )
+    try:
+        module = importlib.import_module(module_name)
+    except ImportError:
+        raise RuntimeError(f"Could not import module {module_name}")
+    try:
+        sensor_class = getattr(module, sensor_name)
+    except AttributeError:
+        raise RuntimeError(f"Could not find attribute {sensor_name} in {module_name}")
+    if (
+        isinstance(sensor_class, type)
+        and issubclass(sensor_class, Sensor)
+        and sensor_class != Sensor
+    ):
+        return sensor_class()
+    else:
+        raise RuntimeError(
+            f"Detected object {sensor_class!r} is not recognised as a Sensor type"
+        )
+
+
 @click.command(help="Displays the values of the sensors")
-def show_sensors():
-    sensors = get_sensors()
+@click.argument("sensor_path", required=False, metavar="path")
+def show_sensors(sensor_path):
+    sensors: Iterable[Sensor[Any]]
+    if sensor_path:
+        try:
+            sensors = [get_sensor_by_path(sensor_path)]
+        except RuntimeError as error:
+            click.secho(str(error), fg="red", bold=True)
+            return RETURN_CODES["BAD_SENSOR_PATH"]
+    else:
+        sensors = get_sensors()
     for sensor in sensors:
         click.secho(sensor.title, bold=True)
         click.echo(str(sensor))
         click.echo("")
+    return RETURN_CODES["OK"]
 
 
 if __name__ == "__main__":
