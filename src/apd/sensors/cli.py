@@ -1,3 +1,4 @@
+import functools
 import importlib
 import typing as t
 
@@ -18,31 +19,52 @@ from .sensors import (
 RETURN_CODES = {"OK": 0, "BAD_SENSOR_PATH": 17}
 
 
-def get_sensor_by_path(sensor_path: str) -> Sensor[t.Any]:
-    try:
-        module_name, sensor_name = sensor_path.split(":")
-    except ValueError:
-        raise RuntimeError(
-            "Sensor path must be in the format dotted.path.to.module:ClassName"
-        )
-    try:
-        module = importlib.import_module(module_name)
-    except ImportError:
-        raise RuntimeError(f"Could not import module {module_name}")
-    try:
-        sensor_class = getattr(module, sensor_name)
-    except AttributeError:
-        raise RuntimeError(f"Could not find attribute {sensor_name} in {module_name}")
-    if (
-        isinstance(sensor_class, type)
-        and issubclass(sensor_class, Sensor)
-        and sensor_class != Sensor
-    ):
-        return sensor_class()
-    else:
-        raise RuntimeError(
-            f"Detected object {sensor_class!r} is not recognised as a Sensor type"
-        )
+class PythonClass(click.types.ParamType):
+    name = "pythonclass"
+
+    def __init__(self, superclass=type):
+        self.superclass = superclass
+
+    def get_sensor_by_path(
+        self, sensor_path: str, fail: t.Callable[[str], None]
+    ) -> t.Any:
+        try:
+            module_name, sensor_name = sensor_path.split(":")
+        except ValueError:
+            return fail(
+                "Class path must be in the format dotted.path.to.module:ClassName"
+            )
+        try:
+            module = importlib.import_module(module_name)
+        except ImportError:
+            return fail(f"Could not import module {module_name}")
+        try:
+            sensor_class = getattr(module, sensor_name)
+        except AttributeError:
+            return fail(f"Could not find attribute {sensor_name} in {module_name}")
+        if (
+            isinstance(sensor_class, type)
+            and issubclass(sensor_class, self.superclass)
+            and sensor_class != self.superclass
+        ):
+            return sensor_class
+        else:
+            return fail(
+                f"Detected object {sensor_class!r} is"
+                f" not recognised as a {self.superclass.__name__} type"
+            )
+
+    def convert(
+        self,
+        value: str,
+        param: t.Optional[click.core.Parameter],
+        ctx: t.Optional[click.core.Context],
+    ) -> t.Any:
+        fail = functools.partial(self.fail, param=param, ctx=ctx)
+        return self.get_sensor_by_path(value, fail)
+
+    def __repr__(self):
+        return "PythonClass"
 
 
 def get_sensors() -> t.Iterable[Sensor[t.Any]]:
@@ -59,16 +81,16 @@ def get_sensors() -> t.Iterable[Sensor[t.Any]]:
 
 @click.command(help="Displays the values of the sensors")
 @click.option(
-    "--develop", required=False, metavar="path", help="Load a sensor by Python path"
+    "--develop",
+    required=False,
+    metavar="path",
+    help="Load a sensor by Python path",
+    type=PythonClass(Sensor),
 )
-def show_sensors(develop: str) -> int:
+def show_sensors(develop: t.Callable[[], Sensor[t.Any]]) -> int:
     sensors: t.Iterable[Sensor[t.Any]]
     if develop:
-        try:
-            sensors = [get_sensor_by_path(develop)]
-        except RuntimeError as error:
-            click.secho(str(error), fg="red", bold=True)
-            return RETURN_CODES["BAD_SENSOR_PATH"]
+        sensors = [develop()]
     else:
         sensors = get_sensors()
     for sensor in sensors:

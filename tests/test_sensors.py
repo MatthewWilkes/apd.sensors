@@ -1,3 +1,5 @@
+import functools
+
 from click.testing import CliRunner
 import pytest
 
@@ -18,14 +20,21 @@ def test_python_version_is_first_two_lines_of_cli_output():
 
 
 class TestSensorFromPath:
+    @staticmethod
+    def fail(message):
+        raise RuntimeError(message)
+
     @pytest.fixture
     def subject(self):
-        return apd.sensors.cli.get_sensor_by_path
+        return functools.partial(
+            apd.sensors.cli.PythonClass(apd.sensors.sensors.Sensor).get_sensor_by_path,
+            fail=self.fail,
+        )
 
     def test_get_sensor_by_path(self, subject):
-        assert isinstance(
-            subject("apd.sensors.sensors:PythonVersion"),
-            apd.sensors.sensors.PythonVersion,
+        assert (
+            subject("apd.sensors.sensors:PythonVersion")
+            == apd.sensors.sensors.PythonVersion
         )
 
     def test_invalid_format(self, subject):
