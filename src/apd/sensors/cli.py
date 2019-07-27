@@ -19,6 +19,14 @@ from .sensors import (
 RETURN_CODES = {"OK": 0, "BAD_SENSOR_PATH": 17}
 
 
+def is_valid_sensor_value(sensor_class, superclass):
+    return (
+        isinstance(sensor_class, type)
+        and issubclass(sensor_class, superclass)
+        and sensor_class != superclass
+    )
+
+
 class PythonClass(click.types.ParamType):
     name = "pythonclass"
 
@@ -42,16 +50,12 @@ class PythonClass(click.types.ParamType):
             sensor_class = getattr(module, sensor_name)
         except AttributeError:
             return fail(f"Could not find attribute {sensor_name} in {module_name}")
-        if (
-            isinstance(sensor_class, type)
-            and issubclass(sensor_class, self.superclass)
-            and sensor_class != self.superclass
-        ):
+        if is_valid_sensor_value(sensor_class, self.superclass):
             return sensor_class
         else:
             return fail(
-                f"Detected object {sensor_class!r} is"
-                f" not recognised as a {self.superclass.__name__} type"
+                f"Detected object {sensor_class!r} is not recognised"
+                f" as a {self.superclass} type"
             )
 
     def convert(
@@ -65,6 +69,23 @@ class PythonClass(click.types.ParamType):
 
     def __repr__(self):
         return "PythonClass"
+
+
+def AutocompleteSensorPath(
+    ctx: click.core.Context, args: list, incomplete: str
+) -> t.List[t.Tuple[str, str]]:
+    try:
+        module_name, sensor_name = incomplete.split(":")
+        module = importlib.import_module(module_name)
+        possibles = [
+            (f"{module_name}:{name}", value.__doc__)
+            for (name, value) in vars(module).items()
+            if name.startswith(sensor_name) and is_valid_sensor_value(value, Sensor)
+        ]
+    except (ValueError, AttributeError):
+        return []
+    else:
+        return possibles
 
 
 def get_sensors() -> t.Iterable[Sensor[t.Any]]:
@@ -86,6 +107,7 @@ def get_sensors() -> t.Iterable[Sensor[t.Any]]:
     metavar="path",
     help="Load a sensor by Python path",
     type=PythonClass(Sensor),
+    autocompletion=AutocompleteSensorPath,
 )
 def show_sensors(develop: t.Callable[[], Sensor[t.Any]]) -> int:
     sensors: t.Iterable[Sensor[t.Any]]
