@@ -15,6 +15,15 @@ T_value = TypeVar("T_value")
 class Sensor(Generic[T_value]):
     title: str
 
+    def __init__(self, **kwargs):
+        if kwargs:
+            raise TypeError(
+                "Sensor got an unexpected keyword argument {}".format(
+                    ", ".join(kwargs.keys())
+                )
+            )
+        return
+
     def value(self) -> T_value:
         raise NotImplementedError
 
@@ -116,18 +125,23 @@ class ACStatus(Sensor[Optional[bool]]):
 class Temperature(Sensor[Optional[float]]):
     title = "Ambient Temperature"
 
+    def __init__(self, board="DHT22", pin="D4"):
+        self.board = board
+        self.pin = pin
+
     def value(self) -> Optional[float]:
         try:
-            # Connect to a DHT22 on pin 4
-            from adafruit_dht import DHT22
-            from board import D4
+            import adafruit_dht
+            import board
         except (ImportError, NotImplementedError):
             # No DHT library results in an ImportError.
             # Running on an unknown platform results in a
             # NotImplementedError when getting the pin
             return None
         try:
-            return DHT22(D4).temperature
+            sensor_type = getattr(adafruit_dht, self.board)
+            pin = getattr(board, self.pin)
+            return sensor_type(pin).temperature
         except RuntimeError:
             return None
 
@@ -149,18 +163,23 @@ class Temperature(Sensor[Optional[float]]):
 class RelativeHumidity(Sensor[Optional[float]]):
     title = "Relative Humidity"
 
+    def __init__(self, board="DHT22", pin="D4"):
+        self.board = board
+        self.pin = pin
+
     def value(self) -> Optional[float]:
         try:
-            # Connect to a DHT22 on pin 4
-            from adafruit_dht import DHT22
-            from board import D4
+            import adafruit_dht
+            import board
         except (ImportError, NotImplementedError):
             # No DHT library results in an ImportError.
             # Running on an unknown platform results in a
             # NotImplementedError when getting the pin
             return None
         try:
-            return DHT22(D4).humidity / 100
+            sensor_type = getattr(adafruit_dht, self.board)
+            pin = getattr(board, self.pin)
+            return sensor_type(pin).humidity / 100
         except RuntimeError:
             return None
 
