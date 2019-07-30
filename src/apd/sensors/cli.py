@@ -1,18 +1,10 @@
 import importlib
+import pkg_resources
 import typing as t
 
 import click
 
-from .sensors import (
-    Sensor,
-    ACStatus,
-    CPULoad,
-    IPAddresses,
-    PythonVersion,
-    RAMAvailable,
-    RelativeHumidity,
-    Temperature,
-)
+from .sensors import Sensor
 
 
 RETURN_CODES = {"OK": 0, "BAD_SENSOR_PATH": 17}
@@ -46,15 +38,11 @@ def get_sensor_by_path(sensor_path: str) -> Sensor[t.Any]:
 
 
 def get_sensors() -> t.Iterable[Sensor[t.Any]]:
-    return [
-        PythonVersion(),
-        IPAddresses(),
-        CPULoad(),
-        RAMAvailable(),
-        ACStatus(),
-        Temperature(),
-        RelativeHumidity(),
-    ]
+    sensors = []
+    for sensor_class in pkg_resources.iter_entry_points("apd_sensors"):
+        class_ = sensor_class.load()
+        sensors.append(t.cast(Sensor[t.Any], class_()))
+    return sensors
 
 
 @click.command(help="Displays the values of the sensors")
