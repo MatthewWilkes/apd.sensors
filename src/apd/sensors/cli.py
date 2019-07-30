@@ -108,7 +108,7 @@ def show_sensors(develop: str, config: str, verbose: bool) -> None:
         try:
             sensors = [get_sensor_by_path(develop)]
         except RuntimeError as error:
-            click.secho(str(error), fg="red", bold=True)
+            click.secho(str(error), fg="red", bold=True, err=True)
             sys.exit(ReturnCodes.BAD_SENSOR_PATH)
     else:
         if config is None:
@@ -124,11 +124,12 @@ def show_sensors(develop: str, config: str, verbose: bool) -> None:
             click.secho(
                 "Looking for configuration in {}".format("; ".join(configs)),
                 fg="yellow",
+                err=True,
             )
         try:
             sensors = get_sensors(configs)
         except RuntimeError as error:
-            click.secho(str(error), fg="red", bold=True)
+            click.secho(str(error), fg="red", bold=True, err=True)
             sys.exit(ReturnCodes.BAD_CONFIG)
     for sensor in sensors:
         click.secho(sensor.title, bold=True)
