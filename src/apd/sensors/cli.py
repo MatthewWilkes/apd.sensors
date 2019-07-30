@@ -1,12 +1,14 @@
 import configparser
 import enum
 import importlib
+import os
 import sys
 import typing as t
 
 import click
 
 from .sensors import Sensor
+from .config_path_utils import user_config_dir, site_config_dirs
 
 
 class ReturnCodes(enum.IntEnum):
@@ -70,7 +72,7 @@ def get_sensor_by_path(sensor_path: str, **kwargs) -> Sensor[t.Any]:
         )
 
 
-def get_sensors(path: str) -> t.Iterable[Sensor[t.Any]]:
+def get_sensors(path: t.Iterable[str]) -> t.Iterable[Sensor[t.Any]]:
     sensors = []
     for plugin_name, sensor_data in parse_config_file(path).items():
         try:
@@ -90,11 +92,17 @@ def get_sensors(path: str) -> t.Iterable[Sensor[t.Any]]:
 @click.option(
     "--config",
     required=False,
-    default="config.cfg",
     metavar="config_path",
     help="Load the specified configuration file",
 )
-def show_sensors(develop: str, config: str) -> None:
+@click.option(
+    "--verbose",
+    "-v",
+    required=False,
+    is_flag=True,
+    help="Print additional programme information",
+)
+def show_sensors(develop: str, config: str, verbose: bool) -> None:
     sensors: t.Iterable[Sensor[t.Any]]
     if develop:
         try:
@@ -103,8 +111,22 @@ def show_sensors(develop: str, config: str) -> None:
             click.secho(str(error), fg="red", bold=True)
             sys.exit(ReturnCodes.BAD_SENSOR_PATH)
     else:
+        if config is None:
+            configs = (
+                [user_config_dir("apd_sensors")]
+                + site_config_dirs("apd_sensors")
+                + [os.getcwd()]
+            )
+            configs = [os.path.join(path, "config.cfg") for path in configs]
+        else:
+            configs = [os.path.abspath(config)]
+        if verbose:
+            click.secho(
+                "Looking for configuration in {}".format("; ".join(configs)),
+                fg="yellow",
+            )
         try:
-            sensors = get_sensors(config)
+            sensors = get_sensors(configs)
         except RuntimeError as error:
             click.secho(str(error), fg="red", bold=True)
             sys.exit(ReturnCodes.BAD_CONFIG)
