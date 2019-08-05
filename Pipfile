@@ -22,6 +22,7 @@ twine = "*"
 
 [packages]
 apd-sensors = {editable = true,path = "."}
+apd-sunnyboy-solar = {editable = true,path = "./plugins/apd.sunnyboy_solar"}
 
 [requires]
 
