@@ -43,7 +43,7 @@ def get_sensor_by_path(sensor_path):
 
 def get_sensors():
     sensors = []
-    for sensor_class in pkg_resources.iter_entry_points("apd_sensors"):
+    for sensor_class in pkg_resources.iter_entry_points("apd.sensors.sensors"):
         class_ = sensor_class.load()
         sensors.append(t.cast(Sensor[t.Any], class_()))
     return sensors

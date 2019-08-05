@@ -11,6 +11,9 @@ repos:
   
   - id: mypy
     name: mypy
+    exclude: (?x)^(
+        (.*)/setup.py
+      )$
     entry: pipenv run mypy
     args: ["--follow-imports=skip"]
     language: system

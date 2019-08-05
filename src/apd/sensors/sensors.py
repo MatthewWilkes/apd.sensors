@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 import math
+import os
 import socket
 import sys
 from typing import Any, Optional, List, Tuple, Iterable, TypeVar, Generic
@@ -116,6 +117,10 @@ class ACStatus(Sensor[Optional[bool]]):
 class Temperature(Sensor[Optional[float]]):
     title = "Ambient Temperature"
 
+    def __init__(self, board=None, pin=None):
+        self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
+        self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D4")
+
     def value(self):
         try:
             # Connect to a DHT22 on pin 4
@@ -148,6 +153,10 @@ class Temperature(Sensor[Optional[float]]):
 
 class RelativeHumidity(Sensor[Optional[float]]):
     title = "Relative Humidity"
+
+    def __init__(self, board=None, pin=None):
+        self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
+        self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D4")
 
     def value(self):
         try:
