@@ -19,6 +19,7 @@ black = "*"
 pre-commit = "*"
 wheel = "*"
 twine = "*"
+webtest = "*"
 
 [packages]
 apd-sensors = {editable = true,path = "."}
