@@ -1,6 +1,7 @@
 from click.testing import CliRunner
 
 import pytest
+from unittest import mock
 
 import apd.sensors.cli
 import apd.sensors.sensors
@@ -11,9 +12,11 @@ def test_sensors():
 
 
 @pytest.mark.functional
-def test_python_version_is_first_two_lines_of_cli_output():
+def test_first_sensor_is_first_two_lines_of_cli_output():
     runner = CliRunner()
-    result = runner.invoke(apd.sensors.cli.show_sensors)
+    with mock.patch("apd.sensors.cli.get_sensors") as get_sensors:
+        get_sensors.return_value = [apd.sensors.sensors.PythonVersion()]
+        result = runner.invoke(apd.sensors.cli.show_sensors)
     python_version = str(apd.sensors.sensors.PythonVersion())
     assert ["Python Version", python_version] == result.stdout.split("\n")[:2]
 
