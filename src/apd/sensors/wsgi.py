@@ -1,31 +1,59 @@
-import json
+from hmac import compare_digest
+import functools
+import os
 import typing as t
+
+import flask
 
 from apd.sensors.cli import get_sensors
 
-if t.TYPE_CHECKING:
-    from wsgiref.types import StartResponse
-else:
-    StartResponse = t.Callable
+
+app = flask.Flask(__name__)
+
+ViewFuncReturn = t.TypeVar("ViewFuncReturn")
+ErrorReturn = t.Tuple[t.Dict[str, str], int]
+REQUIRED_CONFIG_KEYS = {"APD_SENSORS_API_KEY"}
 
 
-def sensor_values(
-    environ: t.Dict[str, str], start_response: StartResponse
-) -> t.List[bytes]:
-    headers = [
-        ("Content-type", "application/json; charset=utf-8"),
-        ("Content-Security-Policy", "default-src 'none';"),
-    ]
-    start_response("200 OK", headers)
+def require_api_key(
+    func: t.Callable[[], ViewFuncReturn]
+) -> t.Callable[[], t.Union[ViewFuncReturn, ErrorReturn]]:
+    @functools.wraps(func)
+    def wrapped() -> t.Union[ViewFuncReturn, ErrorReturn]:
+        api_key = flask.current_app.config["APD_SENSORS_API_KEY"]
+        headers = flask.request.headers
+        supplied_key = headers.get("X-API-Key", "")
+        if not compare_digest(api_key, supplied_key):
+            return {"error": "Supply API key in X-API-Key header"}, 403
+        return func()
+
+    return wrapped
+
+
+@app.route("/sensors/")
+@require_api_key
+def sensor_values() -> t.Tuple[t.Dict[str, t.Any], int, t.Dict[str, str]]:
+    headers = {"Content-Security-Policy": "default-src 'none'"}
     data = {}
     for sensor in get_sensors():
         data[sensor.title] = sensor.value()
-    encoded = json.dumps(data).encode("utf-8")
-    return [encoded]
+    return data, 200, headers
+
+
+def set_up_config(environ: t.Optional[t.Dict[str, str]] = None) -> flask.Flask:
+    if environ is None:
+        environ = dict(os.environ)
+    missing_keys = REQUIRED_CONFIG_KEYS - environ.keys()
+    if missing_keys:
+        raise ValueError("Missing config variables: {}".format(", ".join(missing_keys)))
+    app.config.from_mapping(environ)
+    return app
 
 
 if __name__ == "__main__":
     import wsgiref.simple_server
 
-    with wsgiref.simple_server.make_server("", 8000, sensor_values) as server:
+    set_up_config()
+
+    with wsgiref.simple_server.make_server("", 8000, app) as server:
         server.serve_forever()

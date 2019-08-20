@@ -20,6 +20,7 @@ pre-commit = "*"
 wheel = "*"
 twine = "*"
 webtest = "*"
+apd-sensors = {editable = true,extras = ["webapp"],path = "."}
 
 [packages]
 apd-sensors = {editable = true,path = "."}
