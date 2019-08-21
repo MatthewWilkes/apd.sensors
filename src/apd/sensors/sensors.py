@@ -119,20 +119,22 @@ class Temperature(Sensor[Optional[float]]):
 
     def __init__(self, board=None, pin=None):
         self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
-        self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D4")
+        self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D20")
 
     def value(self) -> Optional[float]:
         try:
             # Connect to a DHT22 on pin 4
-            from adafruit_dht import DHT22
-            from board import D4
-        except (ImportError, NotImplementedError):
+            import adafruit_dht
+            import board
+            sensor_type = getattr(adafruit_dht, self.board)
+            pin = getattr(board, self.pin)
+        except (ImportError, NotImplementedError, AttributeError):
             # No DHT library results in an ImportError.
             # Running on an unknown platform results in a
             # NotImplementedError when getting the pin
             return None
         try:
-            return DHT22(D4).temperature
+            return sensor_type(pin).temperature
         except RuntimeError:
             return None
 
@@ -156,20 +158,21 @@ class RelativeHumidity(Sensor[Optional[float]]):
 
     def __init__(self, board=None, pin=None):
         self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
-        self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D4")
+        self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D20")
 
     def value(self) -> Optional[float]:
         try:
-            # Connect to a DHT22 on pin 4
-            from adafruit_dht import DHT22
-            from board import D4
-        except (ImportError, NotImplementedError):
+            import adafruit_dht
+            import board
+            sensor_type = getattr(adafruit_dht, self.board)
+            pin = getattr(board, self.pin)
+        except (ImportError, NotImplementedError, AttributeError):
             # No DHT library results in an ImportError.
             # Running on an unknown platform results in a
             # NotImplementedError when getting the pin
             return None
         try:
-            return DHT22(D4).humidity / 100
+            return sensor_type(pin).humidity
         except RuntimeError:
             return None
 
