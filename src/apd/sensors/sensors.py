@@ -135,20 +135,16 @@ class Temperature(Sensor[Optional[float]]):
             # NotImplementedError when getting the pin
             return None
         try:
-            return sensor_type(pin).temperature
+            return ureg.Quantity(sensor_type(pin).temperature, ureg.celsius)
         except RuntimeError:
             return None
-
-    @staticmethod
-    def celsius_to_fahrenheit(value):
-        return value * 9 / 5 + 32
 
     @classmethod
     def format(cls, value):
         if value is None:
             return "Unknown"
         else:
-            return "{:.1f}C ({:.1f}F)".format(value, cls.celsius_to_fahrenheit(value))
+            return "{:.3~P} ({:.3~P})".format(value, value.to(ureg.fahrenheit))
 
     def __str__(self):
         return self.format(self.value())
