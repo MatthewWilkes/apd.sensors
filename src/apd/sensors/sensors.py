@@ -8,6 +8,7 @@ from typing import Any, Optional, List, Tuple, Iterable, TypeVar, Generic
 
 
 import psutil
+from pint import _DEFAULT_REGISTRY as ureg
 
 
 T_value = TypeVar("T_value")
@@ -70,7 +71,7 @@ class CPULoad(Sensor[float]):
     title = "CPU Usage"
 
     def value(self) -> float:
-        return psutil.cpu_percent(interval=3) / 100.0
+        return float(psutil.cpu_percent(interval=3)) / 100.0
 
     @classmethod
     def format(cls, value: float) -> str:
@@ -83,7 +84,7 @@ class RAMAvailable(Sensor[int]):
     UNIT_SIZE = 2 ** 10
 
     def value(self) -> int:
-        return psutil.virtual_memory().available
+        return int(psutil.virtual_memory().available)
 
     @classmethod
     def format(cls, value: int) -> str:
@@ -100,7 +101,7 @@ class ACStatus(Sensor[Optional[bool]]):
     def value(self) -> Optional[bool]:
         battery = psutil.sensors_battery()
         if battery is not None:
-            return battery.power_plugged
+            return bool(battery.power_plugged)
         else:
             return None
 
@@ -114,18 +115,18 @@ class ACStatus(Sensor[Optional[bool]]):
             return "Not connected"
 
 
-class Temperature(Sensor[Optional[float]]):
+class Temperature(Sensor[Optional[Any]]):
     title = "Ambient Temperature"
 
-    def __init__(self, board=None, pin=None):
+    def __init__(self) -> None:
         self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
         self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D20")
 
-    def value(self) -> Optional[float]:
+    def value(self) -> Optional[Any]:
         try:
-            # Connect to a DHT22 on pin 4
             import adafruit_dht
             import board
+
             sensor_type = getattr(adafruit_dht, self.board)
             pin = getattr(board, self.pin)
         except (ImportError, NotImplementedError, AttributeError):
@@ -152,7 +153,7 @@ class Temperature(Sensor[Optional[float]]):
 class RelativeHumidity(Sensor[Optional[float]]):
     title = "Relative Humidity"
 
-    def __init__(self, board=None, pin=None):
+    def __init__(self) -> None:
         self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
         self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D20")
 
@@ -160,6 +161,7 @@ class RelativeHumidity(Sensor[Optional[float]]):
         try:
             import adafruit_dht
             import board
+
             sensor_type = getattr(adafruit_dht, self.board)
             pin = getattr(board, self.pin)
         except (ImportError, NotImplementedError, AttributeError):
@@ -167,8 +169,9 @@ class RelativeHumidity(Sensor[Optional[float]]):
             # Running on an unknown platform results in a
             # NotImplementedError when getting the pin
             return None
+
         try:
-            return sensor_type(pin).humidity
+            return float(sensor_type(pin).humidity)
         except RuntimeError:
             return None
 
