@@ -5,10 +5,6 @@ import typing as t
 
 import flask
 
-from apd.sensors.cli import get_sensors
-
-
-app = flask.Flask(__name__)
 
 ViewFuncReturn = t.TypeVar("ViewFuncReturn")
 ErrorReturn = t.Tuple[t.Dict[str, str], int]
@@ -28,34 +24,17 @@ def require_api_key(func):
     return wrapped
 
 
-@app.route("/sensors/")
-@require_api_key
-def sensor_values():
-    headers = {"Content-Security-Policy": "default-src 'none'"}
-    data = {}
-    for sensor in get_sensors():
-        data[sensor.title] = sensor.value()
-    return data, 200, headers
-
-
 def set_up_config(
     environ=None, to_configure=None,
 ):
     if environ is None:
         environ = dict(os.environ)
     if to_configure is None:
+        from apd.sensors.wsgi import app
+
         to_configure = app
     missing_keys = REQUIRED_CONFIG_KEYS - environ.keys()
     if missing_keys:
         raise ValueError("Missing config variables: {}".format(", ".join(missing_keys)))
     to_configure.config.from_mapping(environ)
     return to_configure
-
-
-if __name__ == "__main__":
-    import wsgiref.simple_server
-
-    set_up_config(None, app)
-
-    with wsgiref.simple_server.make_server("", 8000, app) as server:
-        server.serve_forever()

@@ -1,6 +1,6 @@
 import pytest
 
-from apd.sensors.sensors import Temperature, RelativeHumidity
+from apd.sensors.sensors import Temperature, RelativeHumidity, ureg
 
 
 @pytest.fixture
@@ -18,40 +18,49 @@ class TestTemperatureFormatter:
     def subject(self, temperature_sensor):
         return temperature_sensor.format
 
+    @staticmethod
+    def to_degc(magnitude):
+        return ureg.Quantity(magnitude, "degree_Celsius")
+
     def test_format_21c(self, subject):
-        assert subject(21.0) == "21.0C (69.8F)"
+        assert subject(self.to_degc(21.0)) == "21.0 °C (69.8 °F)"
 
     def test_format_negative(self, subject):
-        assert subject(-32.0) == "-32.0C (-25.6F)"
+        assert subject(self.to_degc(-32.0)) == "-32.0 °C (-25.6 °F)"
 
     def test_format_unknown(self, subject):
         assert subject(None) == "Unknown"
 
 
-class TestTemperatureConversion:
+class TestTemperatureSerializer:
     @pytest.fixture
-    def subject(self, temperature_sensor):
-        return temperature_sensor.celsius_to_fahrenheit
+    def serialize(self, temperature_sensor):
+        return temperature_sensor.to_json_compatible
 
-    def test_celsius_to_fahrenheit(self, subject):
-        c = 21
-        f = subject(c)
-        assert f == 69.8
+    @pytest.fixture
+    def deserialize(self, temperature_sensor):
+        return temperature_sensor.from_json_compatible
 
-    def test_celsius_to_fahrenheit_equivlance_point(self, subject):
-        c = -40
-        f = subject(c)
-        assert f == -40
+    @staticmethod
+    def to_degc(magnitude):
+        return ureg.Quantity(magnitude, "degree_Celsius")
 
-    def test_celsius_to_fahrenheit_float(self, subject):
-        c = 21.2
-        f = subject(c)
-        assert f == 70.16
+    def test_serialize_21c(self, serialize):
+        assert serialize(self.to_degc(21.0)) == {
+            "magnitude": 21.0,
+            "unit": "degree_Celsius",
+        }
 
-    def test_celsius_to_fahrenheit_string(self, subject):
-        c = "21"
-        with pytest.raises(TypeError):
-            subject(c)
+    def test_serialize_negative(self, serialize):
+        assert serialize(self.to_degc(-32.3)) == {
+            "magnitude": -32.3,
+            "unit": "degree_Celsius",
+        }
+
+    def test_deserialize_21c(self, deserialize):
+        assert deserialize(
+            {"magnitude": 21.0, "unit": "degree_Celsius"}
+        ) == self.to_degc(21.0)
 
 
 class TestHumidityFormatter:

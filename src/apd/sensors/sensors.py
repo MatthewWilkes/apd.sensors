@@ -4,35 +4,20 @@ import math
 import os
 import socket
 import sys
-from typing import Any, Optional, List, Tuple, Iterable, TypeVar, Generic
-
+import typing as t
 
 import psutil
 from pint import _DEFAULT_REGISTRY as ureg
 
-
-T_value = TypeVar("T_value")
-
-
-class Sensor(Generic[T_value]):
-    title: str
-
-    def value(self):
-        raise NotImplementedError
-
-    @classmethod
-    def format(cls, value):
-        raise NotImplementedError
-
-    def __str__(self):
-        return self.format(self.value())
+from .base import Sensor, JSONSensor, version_info_type
 
 
-class PythonVersion(Sensor[Any]):
+class PythonVersion(JSONSensor[version_info_type]):
+    name = "PythonVersion"
     title = "Python Version"
 
     def value(self):
-        return sys.version_info
+        return version_info_type(*sys.version_info)
 
     @classmethod
     def format(cls, value):
@@ -41,7 +26,8 @@ class PythonVersion(Sensor[Any]):
         return "{0.major}.{0.minor}".format(value)
 
 
-class IPAddresses(Sensor[Iterable[Tuple[str, str]]]):
+class IPAddresses(JSONSensor[t.Iterable[t.Tuple[str, str]]]):
+    name = "IPAddresses"
     title = "IP Addresses"
     FAMILIES = {"AF_INET": "IPv4", "AF_INET6": "IPv6"}
 
@@ -49,7 +35,7 @@ class IPAddresses(Sensor[Iterable[Tuple[str, str]]]):
         hostname = socket.gethostname()
         addresses = socket.getaddrinfo(hostname, None)
 
-        address_info: List[Tuple[str, str]] = []
+        address_info: t.List[t.Tuple[str, str]] = []
         for address in addresses:
             family, ip = (address[0].name, address[4][0])
             if family not in self.FAMILIES:
@@ -67,7 +53,8 @@ class IPAddresses(Sensor[Iterable[Tuple[str, str]]]):
         )
 
 
-class CPULoad(Sensor[float]):
+class CPULoad(JSONSensor[float]):
+    name = "CPULoad"
     title = "CPU Usage"
 
     def value(self):
@@ -78,7 +65,8 @@ class CPULoad(Sensor[float]):
         return "{:.1%}".format(value)
 
 
-class RAMAvailable(Sensor[int]):
+class RAMAvailable(JSONSensor[int]):
+    name = "RAMAvailable"
     title = "RAM Available"
     UNITS = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
     UNIT_SIZE = 2 ** 10
@@ -95,13 +83,18 @@ class RAMAvailable(Sensor[int]):
         return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude])
 
 
-class ACStatus(Sensor[Optional[bool]]):
+class ACStatus(JSONSensor[t.Optional[bool]]):
+    name = "ACStatus"
     title = "AC Connected"
 
     def value(self):
         battery = psutil.sensors_battery()
         if battery is not None:
-            return bool(battery.power_plugged)
+            value = battery.power_plugged
+            if value is None:
+                return None
+            else:
+                return bool(value)
         else:
             return None
 
@@ -115,7 +108,8 @@ class ACStatus(Sensor[Optional[bool]]):
             return "Not connected"
 
 
-class Temperature(Sensor[Optional[Any]]):
+class Temperature(Sensor[t.Optional[t.Any]]):
+    name = "Temperature"
     title = "Ambient Temperature"
 
     def __init__(self):
@@ -146,11 +140,26 @@ class Temperature(Sensor[Optional[Any]]):
         else:
             return "{:.3~P} ({:.3~P})".format(value, value.to(ureg.fahrenheit))
 
+    @classmethod
+    def to_json_compatible(cls, value):
+        if value is not None:
+            return {"magnitude": value.magnitude, "unit": str(value.units)}
+        else:
+            return None
+
+    @classmethod
+    def from_json_compatible(cls, json_version):
+        if json_version:
+            return ureg.Quantity(json_version["magnitude"], ureg[json_version["unit"]])
+        else:
+            return None
+
     def __str__(self):
         return self.format(self.value())
 
 
-class RelativeHumidity(Sensor[Optional[float]]):
+class RelativeHumidity(JSONSensor[t.Optional[float]]):
+    name = "RelativeHumidity"
     title = "Relative Humidity"
 
     def __init__(self):

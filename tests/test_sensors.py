@@ -1,7 +1,9 @@
+import json
+from unittest import mock
+
 from click.testing import CliRunner
 
 import pytest
-from unittest import mock
 
 import apd.sensors.cli
 import apd.sensors.sensors
@@ -57,3 +59,30 @@ def test_develop_option_finds_sensor_by_path():
     )
     python_version = str(apd.sensors.sensors.PythonVersion())
     assert ["Python Version", python_version, "", ""] == result.stdout.split("\n")
+
+
+class TestDefaultSerializer:
+    @pytest.fixture
+    def python_version(self):
+        return apd.sensors.sensors.PythonVersion()
+
+    @pytest.fixture
+    def serialize(self, python_version):
+        return python_version.to_json_compatible
+
+    @pytest.fixture
+    def deserialize(self, python_version):
+        return python_version.from_json_compatible
+
+    def test_serialize_deserialize_is_symmetric(
+        self, python_version, serialize, deserialize
+    ):
+        value = python_version.value()
+        serialized = serialize(value)
+        json_version = json.dumps(serialized)
+        assert (
+            json_version
+            == f'[{value.major}, {value.minor}, {value.micro}, "{value.releaselevel}", {value.serial}]'
+        )
+        deserialized = deserialize(serialized)
+        assert deserialized == value
