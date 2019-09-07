@@ -2,19 +2,24 @@ import os
 import subprocess
 import typing as t
 
-from apd.sensors.sensors import Sensor
+from pint import _DEFAULT_REGISTRY as ureg
+
+from apd.sensors.base import Sensor
 
 
-class SolarCumulativeOutput(Sensor[t.Optional[float]]):
+class SolarCumulativeOutput(Sensor[t.Optional[t.Any]]):
+    name = "SolarCumulativeOutput"
     title = "Solar panel cumulative output"
 
-    def __init__(self, path=None, bt_addr=None):
+    def __init__(
+        self, path: t.Optional[str] = None, bt_addr: t.Optional[str] = None
+    ) -> None:
         self.path = os.environ.get(
             "APD_SUNNYBOYSOLAR_PATH", "/home/pi/opensunny-master/opensunny"
         )
         self.bt_addr = os.environ.get("APD_SUNNYBOYSOLAR_BT_ADDRESS", None)
 
-    def value(self) -> t.Optional[float]:
+    def value(self) -> t.Optional[t.Any]:
         if self.bt_addr is None:
             return None
         try:
@@ -39,10 +44,26 @@ class SolarCumulativeOutput(Sensor[t.Optional[float]]):
                 return None
         except (ValueError, IndexError):
             return None
-        return yield_total
+        return ureg.Quantity(yield_total, "watt")
 
     @classmethod
-    def format(cls, value: t.Optional[float]) -> str:
+    def format(cls, value: t.Optional[t.Any]) -> str:
         if value is None:
             return "Unknown"
-        return "{} kW".format(value / 1000)
+        return "{:~P}".format(value.to(ureg.kilowatt))
+
+    @classmethod
+    def to_json_compatible(
+        cls, value: t.Optional[t.Any]
+    ) -> t.Optional[t.Dict[str, t.Union[str, float]]]:
+        if value is not None:
+            return {"magnitude": value.magnitude, "unit": str(value.units)}
+        else:
+            return None
+
+    @classmethod
+    def from_json_compatible(cls, json_version: t.Any) -> t.Optional[t.Any]:
+        if json_version:
+            return ureg.Quantity(json_version["magnitude"], ureg[json_version["unit"]])
+        else:
+            return None
