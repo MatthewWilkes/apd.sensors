@@ -59,3 +59,8 @@ should be set to the API key required to gain access. One can be generated
 using:
 
     python -c "import uuid; print(uuid.uuid4().hex)"
+
+The following endpoints are supported:
+
+* /v/2.0/sensors
+* /v/2.0/sensors/sensorid
