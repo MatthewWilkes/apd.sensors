@@ -45,7 +45,7 @@ There is an optional API server shipped with apd.sensors. To use this you
 should install the `apd.sensors[webapp]` extra. The API can then be started
 with the non-production quality wsgiref server using:
 
-    python -m apd.sensors.wsgi
+    python -m apd.sensors.wsgi.serve
 
 or through Waitress (if installed) using:
 
