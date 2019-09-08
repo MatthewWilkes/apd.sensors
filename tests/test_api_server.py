@@ -17,24 +17,12 @@ def api_key():
     return uuid.uuid4().hex
 
 
-@pytest.fixture(scope="session")
-def subject_v20(api_key):
-    app = flask.Flask("testapp")
-    app.register_blueprint(v20.version)
-    set_up_config({"APD_SENSORS_API_KEY": api_key}, to_configure=app)
-    return app
-
-
-@pytest.fixture(scope="session")
-def api_server_v20(subject_v20):
-    return TestApp(subject_v20)
-
-
 def test_api_key_is_required_config_option():
+    app = mock.MagicMock()
     with pytest.raises(
         ValueError, match="Missing config variables: APD_SENSORS_API_KEY"
     ):
-        set_up_config({})
+        set_up_config({}, to_configure=app)
 
 
 def test_os_environ_is_default_for_config_values(api_key):
@@ -49,18 +37,7 @@ def test_os_environ_is_default_for_config_values(api_key):
         del os.environ["APD_SENSORS_API_KEY"]
 
 
-class Testv10API:
-    @pytest.fixture
-    def subject(self, api_key):
-        app = flask.Flask("testapp")
-        app.register_blueprint(v10.version)
-        set_up_config({"APD_SENSORS_API_KEY": api_key}, to_configure=app)
-        return app
-
-    @pytest.fixture
-    def api_server(self, subject):
-        return TestApp(subject)
-
+class CommonTests:
     @pytest.mark.functional
     def test_sensor_values_fails_on_missing_api_key(self, api_server):
         response = api_server.get("/sensors/", expect_errors=True)
@@ -74,6 +51,19 @@ class Testv10API:
         )
         assert response.status_code == 403
         assert response.json["error"] == "Supply API key in X-API-Key header"
+
+
+class Testv10API(CommonTests):
+    @pytest.fixture
+    def subject(self, api_key):
+        app = flask.Flask("testapp")
+        app.register_blueprint(v10.version)
+        set_up_config({"APD_SENSORS_API_KEY": api_key}, to_configure=app)
+        return app
+
+    @pytest.fixture
+    def api_server(self, subject):
+        return TestApp(subject)
 
     @pytest.mark.functional
     def test_sensor_values_returned_as_json(self, api_server, api_key):
@@ -91,7 +81,7 @@ class Testv10API:
         assert "Temperature" not in sensor_names
 
 
-class Testv20API:
+class Testv20API(CommonTests):
     @pytest.fixture
     def subject(self, api_key):
         app = flask.Flask("testapp")
@@ -102,20 +92,6 @@ class Testv20API:
     @pytest.fixture
     def api_server(self, subject):
         return TestApp(subject)
-
-    @pytest.mark.functional
-    def test_sensor_values_fails_on_missing_api_key(self, api_server):
-        response = api_server.get("/sensors/", expect_errors=True)
-        assert response.status_code == 403
-        assert response.json["error"] == "Supply API key in X-API-Key header"
-
-    @pytest.mark.functional
-    def test_sensor_values_require_correct_api_key(self, api_server):
-        response = api_server.get(
-            "/sensors/", headers={"X-API-Key": "wrong_key"}, expect_errors=True
-        )
-        assert response.status_code == 403
-        assert response.json["error"] == "Supply API key in X-API-Key header"
 
     @pytest.mark.functional
     def test_sensor_values_returned_as_json(self, api_server, api_key):
