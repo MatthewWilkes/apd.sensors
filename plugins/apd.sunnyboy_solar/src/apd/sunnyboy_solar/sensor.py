@@ -40,7 +40,7 @@ class SolarCumulativeOutput(Sensor[t.Optional[t.Any]]):
             power_dc_2 = int(found[b"power_dc_2"][:-1])
             if power_dc_1 > 1500 or power_dc_2 > 1500:
                 return None
-        except (ValueError, IndexError):
+        except (ValueError, IndexError, KeyError):
             return None
         return ureg.Quantity(yield_total, "watt")
 
