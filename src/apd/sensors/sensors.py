@@ -117,7 +117,6 @@ class Temperature(Sensor[t.Optional[t.Any]]):
         self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D20")
 
     def value(self) -> t.Optional[t.Any]:
-        return ureg.Quantity(21.2, ureg.celsius)
         try:
             import adafruit_dht
             import board
