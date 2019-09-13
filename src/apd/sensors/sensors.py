@@ -116,7 +116,7 @@ class Temperature(Sensor[t.Optional[t.Any]]):
         self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
         self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D20")
 
-    def value(self) -> Optional[Any]:
+    def value(self) -> t.Optional[t.Any]:
         try:
             import adafruit_dht
             import board
