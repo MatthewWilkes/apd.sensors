@@ -25,6 +25,7 @@ apd-sensors = {editable = true,extras = ["webapp"],path = "."}
 [packages]
 apd-sensors = {editable = true,path = "."}
 apd-sunnyboy-solar = {editable = true,path = "./plugins/apd.sunnyboy_solar"}
+waitress = "*"
 pint = "*"
 
 [requires]
