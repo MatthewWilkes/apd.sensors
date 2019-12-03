@@ -30,3 +30,10 @@ def sensor_values(sensor_id=None):
             pass
     data = {"sensors": sensors}
     return data, 200, headers
+
+
+@version.route("/deployment_id")
+def deployment_id():
+    headers = {"Content-Security-Policy": "default-src 'none'"}
+    data = {"deployment_id": flask.current_app.config["APD_SENSORS_DEPLOYMENT_ID"]}
+    return data, 200, headers
