@@ -20,6 +20,10 @@ class PythonVersion(JSONSensor[version_info_type]):
         return version_info_type(*sys.version_info)
 
     @classmethod
+    def from_json_compatible(cls, json_version):
+        return version_info_type(*json_version)
+
+    @classmethod
     def format(cls, value):
         if value.micro == 0 and value.releaselevel == "alpha":
             return "{0.major}.{0.minor}.{0.micro}a{0.serial}".format(value)
