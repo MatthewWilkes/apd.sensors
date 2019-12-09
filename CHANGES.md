@@ -1,5 +1,10 @@
 ## Changes
 
+### 2.1.0 (2019-12-09)
+
+* Add optional APD_SENSORS_DEPLOYMENT_ID parameter and v2.1 API which allows
+  users to find a unique identifier for a webapp sensor deployment (Matthew Wilkes)
+
 ### 2.0.0 (2019-09-08)
 
 * Add `to_json_compatible` and `from_json_compatible` methods to Sensor
