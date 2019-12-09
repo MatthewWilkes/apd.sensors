@@ -8,7 +8,7 @@ import flask
 
 ViewFuncReturn = t.TypeVar("ViewFuncReturn")
 ErrorReturn = t.Tuple[t.Dict[str, str], int]
-REQUIRED_CONFIG_KEYS = {"APD_SENSORS_API_KEY", "APD_SENSORS_DEPLOYMENT_ID"}
+REQUIRED_CONFIG_KEYS = {"APD_SENSORS_API_KEY"}
 
 
 def require_api_key(

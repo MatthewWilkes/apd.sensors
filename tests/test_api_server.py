@@ -26,14 +26,6 @@ def test_api_key_is_required_config_option():
         set_up_config({"APD_SENSORS_DEPLOYMENT_ID": ""}, to_configure=app)
 
 
-def test_deployment_id_is_required_config_option():
-    app = mock.MagicMock()
-    with pytest.raises(
-        ValueError, match="Missing config variables: APD_SENSORS_DEPLOYMENT_ID"
-    ):
-        set_up_config({"APD_SENSORS_API_KEY": ""}, to_configure=app)
-
-
 def test_os_environ_is_default_for_config_values(api_key):
     app = mock.MagicMock()
     os.environ["APD_SENSORS_API_KEY"] = api_key
