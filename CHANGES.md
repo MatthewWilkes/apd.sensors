@@ -1,5 +1,10 @@
 ## Changes
 
+### 2.1.1 (2020-01-06)
+
+* Cache DHT sensor connections (Matthew Wilkes)
+* Force use of bitbang interface for DHT sensors, to improve reliability on Linux (Matthew Wilkes)
+
 ### 2.1.0 (2019-12-09)
 
 * Add optional APD_SENSORS_DEPLOYMENT_ID parameter and v2.1 API which allows
