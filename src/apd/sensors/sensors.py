@@ -112,29 +112,38 @@ class ACStatus(JSONSensor[t.Optional[bool]]):
             return "Not connected"
 
 
-class Temperature(Sensor[t.Optional[t.Any]]):
-    name = "Temperature"
-    title = "Ambient Temperature"
-
+class DHTSensor:
     def __init__(self):
         self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
         self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D20")
 
-    def value(self):
+    @property
+    def sensor(self):
         try:
             import adafruit_dht
             import board
 
+            # Force using legacy interface
+            adafruit_dht._USE_PULSEIO = False
+
             sensor_type = getattr(adafruit_dht, self.board)
             pin = getattr(board, self.pin)
+            return sensor_type(pin)
         except (ImportError, NotImplementedError, AttributeError):
             # No DHT library results in an ImportError.
             # Running on an unknown platform results in a
             # NotImplementedError when getting the pin
             return None
+
+
+class Temperature(Sensor[t.Optional[t.Any]], DHTSensor):
+    name = "Temperature"
+    title = "Ambient Temperature"
+
+    def value(self):
         try:
-            return ureg.Quantity(sensor_type(pin).temperature, ureg.celsius)
-        except RuntimeError:
+            return ureg.Quantity(self.sensor.temperature, ureg.celsius)
+        except (RuntimeError, AttributeError):
             return None
 
     @classmethod
@@ -162,30 +171,14 @@ class Temperature(Sensor[t.Optional[t.Any]]):
         return self.format(self.value())
 
 
-class RelativeHumidity(JSONSensor[t.Optional[float]]):
+class RelativeHumidity(JSONSensor[t.Optional[float]], DHTSensor):
     name = "RelativeHumidity"
     title = "Relative Humidity"
 
-    def __init__(self):
-        self.board = os.environ.get("APD_SENSORS_TEMPERATURE_BOARD", "DHT22")
-        self.pin = os.environ.get("APD_SENSORS_TEMPERATURE_PIN", "D20")
-
     def value(self):
         try:
-            import adafruit_dht
-            import board
-
-            sensor_type = getattr(adafruit_dht, self.board)
-            pin = getattr(board, self.pin)
-        except (ImportError, NotImplementedError, AttributeError):
-            # No DHT library results in an ImportError.
-            # Running on an unknown platform results in a
-            # NotImplementedError when getting the pin
-            return None
-
-        try:
-            return float(sensor_type(pin).humidity)
-        except RuntimeError:
+            return float(self.sensor.humidity)
+        except (RuntimeError, AttributeError):
             return None
 
     @classmethod
