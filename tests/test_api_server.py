@@ -89,6 +89,18 @@ class Testv10API(CommonTests):
         sensor_names = value.keys()
         assert "Temperature" not in sensor_names
 
+    @pytest.mark.functional
+    def test_erroring_sensor_shows_None(self, api_server, api_key):
+        from .test_utils import FailingSensor
+
+        with mock.patch("apd.sensors.cli.get_sensors") as get_sensors:
+            # Ensure failing sensor is first, to test that subsequent sensors
+            # are still processed
+            get_sensors.return_value = [FailingSensor(10), PythonVersion()]
+            value = api_server.get("/sensors/", headers={"X-API-Key": api_key}).json
+        assert value["Sensor which fails"] is None
+        assert "Python Version" in value.keys()
+
 
 class Testv20API(CommonTests):
     @pytest.fixture
@@ -119,6 +131,26 @@ class Testv20API(CommonTests):
         assert python_version["title"] == "Python Version"
         assert python_version["value"] == list(PythonVersion().value())
 
+    @pytest.mark.functional
+    def test_erroring_sensor_shows_None(self, api_server, api_key):
+        from .test_utils import FailingSensor
+
+        with mock.patch("apd.sensors.cli.get_sensors") as get_sensors:
+            # Ensure failing sensor is first, to test that subsequent sensors
+            # are still processed
+            get_sensors.return_value = [FailingSensor(10), PythonVersion()]
+            value = api_server.get("/sensors/", headers={"X-API-Key": api_key}).json
+        sensors = value["sensors"]
+
+        failing = [sensor for sensor in sensors if sensor["id"] == "FailingSensor"][0]
+        python_version = [
+            sensor for sensor in sensors if sensor["id"] == "PythonVersion"
+        ][0]
+
+        assert failing["title"] == "Sensor which fails"
+        assert failing["value"] is None
+        assert python_version["title"] == "Python Version"
+
 
 class Testv21API(Testv20API):
     @pytest.fixture
@@ -138,3 +170,23 @@ class Testv21API(Testv20API):
     def test_deployment_id(self, api_server, api_key):
         value = api_server.get("/deployment_id", headers={"X-API-Key": api_key}).json
         assert value == {"deployment_id": "8f1b57faa04b430c81decbbeee9e300c"}
+
+    @pytest.mark.functional
+    def test_erroring_sensor_shows_None(self, api_server, api_key):
+        from .test_utils import FailingSensor
+
+        with mock.patch("apd.sensors.cli.get_sensors") as get_sensors:
+            # Ensure failing sensor is first, to test that subsequent sensors
+            # are still processed
+            get_sensors.return_value = [FailingSensor(10), PythonVersion()]
+            value = api_server.get("/sensors/", headers={"X-API-Key": api_key}).json
+        sensors = value["sensors"]
+
+        failing = [sensor for sensor in sensors if sensor["id"] == "FailingSensor"][0]
+        python_version = [
+            sensor for sensor in sensors if sensor["id"] == "PythonVersion"
+        ][0]
+
+        assert failing["title"] == "Sensor which fails"
+        assert failing["value"] is None
+        assert python_version["title"] == "Python Version"

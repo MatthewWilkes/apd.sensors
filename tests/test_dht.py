@@ -28,9 +28,6 @@ class TestTemperatureFormatter:
     def test_format_negative(self, subject):
         assert subject(self.to_degc(-32.0)) == "-32.0 °C (-25.6 °F)"
 
-    def test_format_unknown(self, subject):
-        assert subject(None) == "Unknown"
-
 
 class TestTemperatureSerializer:
     @pytest.fixture
@@ -70,6 +67,3 @@ class TestHumidityFormatter:
 
     def test_format_percentage(self, subject):
         assert subject(0.035) == "3.5%"
-
-    def test_format_unknown(self, subject):
-        assert subject(None) == "Unknown"

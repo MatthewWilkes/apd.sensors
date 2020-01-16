@@ -3,6 +3,7 @@ import typing as t
 import flask
 
 from apd.sensors import cli
+from apd.sensors.exceptions import DataCollectionError
 from .base import require_api_key
 
 version = flask.Blueprint(__name__, __name__)
@@ -18,12 +19,19 @@ def sensor_values(sensor_id=None):
         if sensor_id and sensor_id != sensor.name:
             continue
         try:
-            value = sensor.value()
+            try:
+                value = sensor.value()
+            except DataCollectionError:
+                human_readable = "Unknown"
+                json_value = None
+            else:
+                json_value = sensor.to_json_compatible(value)
+                human_readable = sensor.format(value)
             sensor_data = {
                 "id": sensor.name,
                 "title": sensor.title,
-                "value": sensor.to_json_compatible(value),
-                "human_readable": sensor.format(value),
+                "value": json_value,
+                "human_readable": human_readable,
             }
             sensors.append(sensor_data)
         except NotImplementedError:

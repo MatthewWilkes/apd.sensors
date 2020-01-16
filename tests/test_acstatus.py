@@ -3,6 +3,10 @@ from unittest import mock
 import pytest
 
 from apd.sensors.sensors import ACStatus
+from apd.sensors.exceptions import (
+    PersistentSensorFailureError,
+    IntermittentSensorFailureError,
+)
 
 
 @pytest.fixture
@@ -20,9 +24,6 @@ class TestACStatusFormatter:
 
     def test_format_False(self, subject):
         assert subject(False) == "Not connected"
-
-    def test_format_None(self, subject):
-        assert subject(None) == "Unknown"
 
 
 class TestACStatusValue:
@@ -42,12 +43,14 @@ class TestACStatusValue:
 
     def test_sensor_but_battery_unknown(self, subject, sensors_battery):
         sensors_battery.return_value.power_plugged = None
-        assert subject() is None
+        with pytest.raises(IntermittentSensorFailureError):
+            subject()
         assert sensors_battery.call_count == 1
 
     def test_no_sensor(self, subject, sensors_battery):
         sensors_battery.return_value = None
-        assert subject() is None
+        with pytest.raises(PersistentSensorFailureError):
+            subject()
 
     def test_str_representation_is_formatted_value(self, sensor, sensors_battery):
         sensors_battery.return_value.power_plugged = True

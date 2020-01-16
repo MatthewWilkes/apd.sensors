@@ -10,6 +10,11 @@ import psutil
 from pint import _DEFAULT_REGISTRY as ureg
 
 from .base import Sensor, JSONSensor, version_info_type
+from .exceptions import (
+    PersistentSensorFailureError,
+    IntermittentSensorFailureError,
+    DataCollectionError,
+)
 
 
 class PythonVersion(JSONSensor[version_info_type]):
@@ -38,7 +43,6 @@ class IPAddresses(JSONSensor[t.Iterable[t.Tuple[str, str]]]):
     def value(self):
         hostname = socket.gethostname()
         addresses = socket.getaddrinfo(hostname, None)
-
         address_info: t.List[t.Tuple[str, str]] = []
         for address in addresses:
             family, ip = (address[0].name, address[4][0])
@@ -87,7 +91,7 @@ class RAMAvailable(JSONSensor[int]):
         return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude])
 
 
-class ACStatus(JSONSensor[t.Optional[bool]]):
+class ACStatus(JSONSensor[bool]):
     name = "ACStatus"
     title = "AC Connected"
 
@@ -96,17 +100,15 @@ class ACStatus(JSONSensor[t.Optional[bool]]):
         if battery is not None:
             value = battery.power_plugged
             if value is None:
-                return None
+                raise IntermittentSensorFailureError("Can't find AC status")
             else:
                 return bool(value)
         else:
-            return None
+            raise PersistentSensorFailureError("No charging circuit installed")
 
     @classmethod
     def format(cls, value):
-        if value is None:
-            return "Unknown"
-        elif value:
+        if value:
             return "Connected"
         else:
             return "Not connected"
@@ -129,61 +131,59 @@ class DHTSensor:
             sensor_type = getattr(adafruit_dht, self.board)
             pin = getattr(board, self.pin)
             return sensor_type(pin)
-        except (ImportError, NotImplementedError, AttributeError):
+        except (ImportError, NotImplementedError, AttributeError) as err:
             # No DHT library results in an ImportError.
             # Running on an unknown platform results in a
             # NotImplementedError when getting the pin
-            return None
+            raise PersistentSensorFailureError(
+                "Unable to initialise sensor interface"
+            ) from err
 
 
-class Temperature(Sensor[t.Optional[t.Any]], DHTSensor):
+class Temperature(Sensor[t.Any], DHTSensor):
     name = "Temperature"
     title = "Ambient Temperature"
 
     def value(self):
         try:
             return ureg.Quantity(self.sensor.temperature, ureg.celsius)
-        except (RuntimeError, AttributeError):
-            return None
+        except DataCollectionError:
+            # This is one of our own exceptions, we don't need to re-wrap it
+            raise
+        except (RuntimeError, AttributeError) as err:
+            raise IntermittentSensorFailureError(
+                "Couldn't determine temperature"
+            ) from err
 
     @classmethod
     def format(cls, value):
-        if value is None:
-            return "Unknown"
-        else:
-            return "{:.3~P} ({:.3~P})".format(value, value.to(ureg.fahrenheit))
+        return "{:.3~P} ({:.3~P})".format(value, value.to(ureg.fahrenheit))
 
     @classmethod
     def to_json_compatible(cls, value):
-        if value is not None:
-            return {"magnitude": value.magnitude, "unit": str(value.units)}
-        else:
-            return None
+        return {"magnitude": value.magnitude, "unit": str(value.units)}
 
     @classmethod
     def from_json_compatible(cls, json_version):
-        if json_version:
-            return ureg.Quantity(json_version["magnitude"], ureg[json_version["unit"]])
-        else:
-            return None
+        return ureg.Quantity(json_version["magnitude"], ureg[json_version["unit"]])
 
     def __str__(self):
         return self.format(self.value())
 
 
-class RelativeHumidity(JSONSensor[t.Optional[float]], DHTSensor):
+class RelativeHumidity(JSONSensor[float], DHTSensor):
     name = "RelativeHumidity"
     title = "Relative Humidity"
 
     def value(self):
         try:
             return float(self.sensor.humidity)
-        except (RuntimeError, AttributeError):
-            return None
+        except DataCollectionError:
+            # This is one of our own exceptions, we don't need to re-wrap it
+            raise
+        except (TypeError, AttributeError) as err:
+            raise IntermittentSensorFailureError("Couldn't determine humidity") from err
 
     @classmethod
     def format(cls, value):
-        if value is None:
-            return "Unknown"
-        else:
-            return "{:.1%}".format(value)
+        return "{:.1%}".format(value)
