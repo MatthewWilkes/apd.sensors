@@ -2,11 +2,13 @@ import enum
 import importlib
 import sys
 import pkg_resources
+import traceback
 import typing as t
 
 import click
 
 from .sensors import Sensor
+from .exceptions import DataCollectionError, UserFacingCLIError
 
 
 class ReturnCodes(enum.IntEnum):
@@ -17,18 +19,23 @@ class ReturnCodes(enum.IntEnum):
 def get_sensor_by_path(sensor_path: str) -> Sensor[t.Any]:
     try:
         module_name, sensor_name = sensor_path.split(":")
-    except ValueError:
-        raise RuntimeError(
-            "Sensor path must be in the format dotted.path.to.module:ClassName"
-        )
+    except ValueError as err:
+        raise UserFacingCLIError(
+            "Sensor path must be in the format dotted.path.to.module:ClassName",
+            return_code=ReturnCodes.BAD_SENSOR_PATH,
+        ) from err
     try:
         module = importlib.import_module(module_name)
-    except ImportError:
-        raise RuntimeError(f"Could not import module {module_name}")
+    except ImportError as err:
+        raise UserFacingCLIError(
+            f"Could not import module {module_name}", return_code=ReturnCodes.BAD_SENSOR_PATH
+        ) from err
     try:
         sensor_class = getattr(module, sensor_name)
-    except AttributeError:
-        raise RuntimeError(f"Could not find attribute {sensor_name} in {module_name}")
+    except AttributeError as err:
+        raise UserFacingCLIError(
+            f"Could not find attribute {sensor_name} in {module_name}", return_code=ReturnCodes.BAD_SENSOR_PATH
+        ) from err
     if (
         isinstance(sensor_class, type)
         and issubclass(sensor_class, Sensor)
@@ -36,8 +43,9 @@ def get_sensor_by_path(sensor_path: str) -> Sensor[t.Any]:
     ):
         return sensor_class()
     else:
-        raise RuntimeError(
-            f"Detected object {sensor_class!r} is not recognised as a Sensor type"
+        raise UserFacingCLIError(
+            f"Detected object {sensor_class!r} is not recognised as a Sensor type",
+            return_code=ReturnCodes.BAD_SENSOR_PATH,
         )
 
 
@@ -53,19 +61,30 @@ def get_sensors() -> t.Iterable[Sensor[t.Any]]:
 @click.option(
     "--develop", required=False, metavar="path", help="Load a sensor by Python path"
 )
-def show_sensors(develop: str) -> None:
+@click.option("--verbose", is_flag=True, help="Show additional info")
+def show_sensors(develop: str, verbose: bool) -> None:
     sensors: t.Iterable[Sensor[t.Any]]
     if develop:
         try:
             sensors = [get_sensor_by_path(develop)]
-        except RuntimeError as error:
-            click.secho(str(error), fg="red", bold=True)
-            sys.exit(ReturnCodes.BAD_SENSOR_PATH)
+        except UserFacingCLIError as error:
+            if verbose:
+                tb = traceback.format_exception(type(error), error, error.__traceback__)
+                click.echo("".join(tb))
+            click.secho(error.message, fg="red", bold=True)
+            sys.exit(error.return_code)
     else:
         sensors = get_sensors()
     for sensor in sensors:
         click.secho(sensor.title, bold=True)
-        click.echo(str(sensor))
+        try:
+            click.echo(str(sensor))
+        except DataCollectionError as error:
+            if verbose:
+                tb = traceback.format_exception(type(error), error, error.__traceback__)
+                click.echo("".join(tb))
+                continue
+            click.echo(error)
         click.echo("")
     sys.exit(ReturnCodes.OK)
 
