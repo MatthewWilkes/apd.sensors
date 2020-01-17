@@ -4,6 +4,7 @@ import typing as t
 import flask
 
 from apd.sensors import cli
+from apd.sensors.base import HistoricalSensor
 from apd.sensors.exceptions import DataCollectionError
 
 from .base import require_api_key
@@ -65,11 +66,15 @@ def historical_values(start=None, end=None):
 
     query = db_session.query(sensor_values)
     if start:
-        query = query.filter(
-            sensor_values.c.collected_at >= dateutil.parser.parse(start)
-        )
+        start_dt = dateutil.parser.parse(start)
+        query = query.filter(sensor_values.c.collected_at >= start_dt)
+    else:
+        start_dt = dateutil.parser.parse("1900-01-01")
     if end:
-        query = query.filter(sensor_values.c.collected_at <= dateutil.parser.parse(end))
+        end_dt = dateutil.parser.parse(end)
+        query = query.filter(sensor_values.c.collected_at <= end_dt)
+    else:
+        end_dt = datetime.datetime.now()
 
     known_sensors = {sensor.name: sensor for sensor in cli.get_sensors()}
     sensors = []
@@ -85,6 +90,17 @@ def historical_values(start=None, end=None):
             "collected_at": data.collected_at.isoformat(),
         }
         sensors.append(sensor_data)
+    for sensor in known_sensors.values():
+        if isinstance(sensor, HistoricalSensor):
+            for date, value in sensor.historical(start_dt, end_dt):
+                sensor_data = {
+                    "id": sensor.name,
+                    "title": sensor.title,
+                    "value": value,
+                    "human_readable": sensor.format(sensor.from_json_compatible(value)),
+                    "collected_at": date.isoformat(),
+                }
+                sensors.append(sensor_data)
     data = {"sensors": sensors}
     try:
         return data, 200, headers

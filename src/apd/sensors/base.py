@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+import datetime
 import typing as t
 
 
@@ -37,6 +38,11 @@ class JSONSensor(Sensor[T_value]):
     @classmethod
     def from_json_compatible(cls, json_version):
         return t.cast(T_value, json_version)
+
+
+class HistoricalSensor(Sensor[T_value]):
+    def historical(self, start, end):
+        raise NotImplementedError
 
 
 version_info_type = t.NamedTuple(
