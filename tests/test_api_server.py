@@ -1,4 +1,6 @@
+import datetime
 import os
+import typing as t
 import uuid
 from unittest import mock
 
@@ -6,12 +8,34 @@ import flask
 import pytest
 from webtest import TestApp
 
+from apd.sensors.base import HistoricalSensor, JSONSensor
 from apd.sensors.sensors import PythonVersion
 from apd.sensors.wsgi import set_up_config
 from apd.sensors.wsgi import v10
 from apd.sensors.wsgi import v20
 from apd.sensors.wsgi import v21
 from apd.sensors.wsgi import v30
+
+
+class HistoricalBoolSensor(HistoricalSensor[bool], JSONSensor[bool]):
+
+    title = "Sensor which has past data"
+    name = "HistoricalBoolSensor"
+
+    def value(self) -> bool:
+        return True
+
+    def historical(
+        self, start: datetime.datetime, end: datetime.datetime
+    ) -> t.Iterable[t.Tuple[datetime.datetime, bool]]:
+        date = start
+        while date < end:
+            yield date, True
+            date += datetime.timedelta(hours=1)
+
+    @classmethod
+    def format(cls, value: bool) -> str:
+        return "Yes" if value else "No"
 
 
 @pytest.fixture(scope="session")
@@ -244,6 +268,23 @@ class Testv30API(CommonTests):
         value = api_server.get("/historical", headers={"X-API-Key": api_key}).json
         assert len(value["sensors"]) == 1
         assert value["sensors"][0]["human_readable"] == "3.9"
+
+    def test_historical_sensor(self, api_key, api_server, db):
+        with mock.patch("apd.sensors.cli.get_sensors") as get_sensors:
+            # Ensure failing sensor is first, to test that subsequent sensors
+            # are still processed
+            get_sensors.return_value = [HistoricalBoolSensor()]
+            value = api_server.get(
+                "/historical/2020-01-01/2020-01-02", headers={"X-API-Key": api_key}
+            ).json
+        assert len(value["sensors"]) == 24
+        assert value["sensors"][0] == {
+            "collected_at": "2020-01-01T00:00:00",
+            "human_readable": "Yes",
+            "id": "HistoricalBoolSensor",
+            "title": "Sensor which has past data",
+            "value": True,
+        }
 
     @pytest.mark.functional
     def test_sensor_values_returned_as_json(self, api_server, api_key):
