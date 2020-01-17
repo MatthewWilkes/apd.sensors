@@ -46,9 +46,9 @@ class TestCLI:
         FailingSensor = mock.MagicMock(spec=Sensor)
         FailingSensor.title = "Sensor which fails"
         FailingSensor.name = "FailingSensor"
-        FailingSensor.__str__.side_effect = IntermittentSensorFailureError(
-            "Failing sensor"
-        )
+        FailingSensor.value.side_effect = (
+            FailingSensor.__str__.side_effect
+        ) = IntermittentSensorFailureError("Failing sensor")
 
         runner = CliRunner()
         with mock.patch("apd.sensors.cli.get_sensors") as get_sensors:

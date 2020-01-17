@@ -1,5 +1,10 @@
 ## Changes
 
+### 2.2 (2020-01-17)
+
+* Add ability to store data points on query (Matthew Wilkes)
+* Add v3.0 API to distinguish sensor errors and include historical data (Matthew Wilkes)
+
 ### 2.1.1 (2020-01-06)
 
 * Cache DHT sensor connections (Matthew Wilkes)
