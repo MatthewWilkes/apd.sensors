@@ -218,10 +218,14 @@ class Testv30API(CommonTests):
     def db(self, subject):
         from flask_sqlalchemy import SQLAlchemy
         from apd.sensors.database import metadata
+        from apd.sensors import wsgi
 
         db = SQLAlchemy(subject, metadata=metadata)
         db.create_all()
-        return db
+
+        wsgi.db = db
+        yield db
+        wsgi.db = None
 
     @pytest.fixture
     def store_sensor_data(self):
@@ -236,9 +240,10 @@ class Testv30API(CommonTests):
 
     @pytest.mark.functional
     def test_historical_with_data(self, api_key, api_server, db, store_sensor_data):
-        value = api_server.get("/historical", headers={"X-API-Key": api_key}).json
         store_sensor_data(PythonVersion, [3, 9, 0, "final", 1], db.session)
-        assert value == {"sensors": []}
+        value = api_server.get("/historical", headers={"X-API-Key": api_key}).json
+        assert len(value["sensors"]) == 1
+        assert value["sensors"][0]["human_readable"] == "3.9"
 
     @pytest.mark.functional
     def test_sensor_values_returned_as_json(self, api_server, api_key):
