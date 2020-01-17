@@ -62,5 +62,35 @@ using:
 
 The following endpoints are supported:
 
-* /v/2.0/sensors
-* /v/2.0/sensors/sensorid
+* /v/3.0/sensors
+* /v/3.0/sensors/sensorid
+* /v/3.0/deployment_id
+
+## Historical data
+
+You can install optional functionality to periodically store sensor
+values using the `apd.sensors[scheduled]` extra. In this case, 
+`sensors --save` will store the recorded data to `sensor_data.sqlite`
+in the current working directory.
+
+The database connection can be specified with `--db sqlite:////var/sensors.sqlite`,
+for example. It can also be specified with the `APD_SENSORS_DB_URI`
+environment variable.
+
+The database must be migrated to contain the correct data first. This can be
+done by running `alembic upgrade head` with the following alembic.ini file
+in the current working directory.
+
+    [alembic]
+    script_location = apd.sensors:alembic
+    sqlalchemy.url = sqlite:///sensor_data.sqlite
+
+### Historical data API
+
+An API to extract historical data is also available if installed with `apd.sensors[webapp,scheduled,storedapi]`.
+
+This provides the following three URIs, where start and end are a date/time in ISO format.
+
+* /v/3.0/historical
+* /v/3.0/historical/start
+* /v/3.0/historical/start/end

@@ -20,13 +20,13 @@ pre-commit = "*"
 wheel = "*"
 twine = "*"
 webtest = "*"
-apd-sensors = {editable = true,extras = ["webapp"],path = "."}
+sqlalchemy-stubs = "*"
 
 [packages]
-apd-sensors = {editable = true,path = "."}
+apd-sensors = {editable = true,extras = ["scheduled", "webapp", "storedapi"],path = "."}
 apd-sunnyboy-solar = {editable = true,path = "./plugins/apd.sunnyboy_solar"}
 waitress = "*"
-pint = "*"
+pint = "==0.9"
 
 [requires]
 
