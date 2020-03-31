@@ -1,8 +1,8 @@
 from unittest import mock
 
-from sensors import RAMAvailable
-
 import pytest
+
+from sensors import RAMAvailable
 
 
 @pytest.fixture
