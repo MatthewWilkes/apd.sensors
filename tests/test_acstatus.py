@@ -1,8 +1,8 @@
 from unittest import mock
 
-from sensors import ACStatus
-
 import pytest
+
+from sensors import ACStatus
 
 
 @pytest.fixture

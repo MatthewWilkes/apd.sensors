@@ -1,9 +1,9 @@
-from unittest import mock
 import socket
-
-from sensors import IPAddresses
+from unittest import mock
 
 import pytest
+
+from sensors import IPAddresses
 
 
 @pytest.fixture

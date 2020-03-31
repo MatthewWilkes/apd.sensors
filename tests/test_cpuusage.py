@@ -1,8 +1,8 @@
 from unittest import mock
 
-from sensors import CPULoad
-
 import pytest
+
+from sensors import CPULoad
 
 
 @pytest.fixture

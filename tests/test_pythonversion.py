@@ -1,9 +1,9 @@
 from collections import namedtuple
 from unittest import mock
 
-from sensors import PythonVersion
-
 import pytest
+
+from sensors import PythonVersion
 
 
 @pytest.fixture

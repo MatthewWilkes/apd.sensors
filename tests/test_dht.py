@@ -1,6 +1,6 @@
-from sensors import Temperature, RelativeHumidity
-
 import pytest
+
+from sensors import Temperature, RelativeHumidity
 
 
 @pytest.fixture
