@@ -3,52 +3,46 @@
 import math
 import socket
 import sys
-from typing import Any, Optional, List, Tuple, Iterable, TypeVar, Generic
 
 
 import click
 import psutil
 
 
-T_value = TypeVar("T_value")
-
-
-class Sensor(Generic[T_value]):
-    title: str
-
-    def value(self) -> T_value:
+class Sensor:
+    def value(self):
         raise NotImplementedError
 
     @classmethod
-    def format(cls, value: T_value) -> str:
+    def format(cls, value):
         raise NotImplementedError
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.format(self.value())
 
 
-class PythonVersion(Sensor[Any]):
+class PythonVersion(Sensor):
     title = "Python Version"
 
-    def value(self) -> Any:
+    def value(self):
         return sys.version_info
 
     @classmethod
-    def format(cls, value: Any) -> str:
+    def format(cls, value):
         if value.micro == 0 and value.releaselevel == "alpha":
             return "{0.major}.{0.minor}.{0.micro}a{0.serial}".format(value)
         return "{0.major}.{0.minor}".format(value)
 
 
-class IPAddresses(Sensor[Iterable[Tuple[str, str]]]):
+class IPAddresses(Sensor):
     title = "IP Addresses"
     FAMILIES = {"AF_INET": "IPv4", "AF_INET6": "IPv6"}
 
-    def value(self) -> List[Tuple[str, str]]:
+    def value(self):
         hostname = socket.gethostname()
         addresses = socket.getaddrinfo(hostname, None)
 
-        address_info: List[Tuple[str, str]] = []
+        address_info = []
         for address in addresses:
             family, ip = (address[0].name, address[4][0])
             if family not in self.FAMILIES:
@@ -59,34 +53,34 @@ class IPAddresses(Sensor[Iterable[Tuple[str, str]]]):
         return address_info
 
     @classmethod
-    def format(cls, value: Iterable[Tuple[str, str]]) -> str:
+    def format(cls, value):
         return "\n".join(
             "{0} ({1})".format(address[1], cls.FAMILIES.get(address[0], "Unknown"))
             for address in value
         )
 
 
-class CPULoad(Sensor[float]):
+class CPULoad(Sensor):
     title = "CPU Usage"
 
-    def value(self) -> float:
+    def value(self):
         return psutil.cpu_percent(interval=3) / 100.0
 
     @classmethod
-    def format(cls, value: float) -> str:
+    def format(cls, value):
         return "{:.1%}".format(value)
 
 
-class RAMAvailable(Sensor[int]):
+class RAMAvailable(Sensor):
     title = "RAM Available"
     UNITS = ("B", "KiB", "MiB", "GiB", "TiB", "PiB", "EiB")
     UNIT_SIZE = 2 ** 10
 
-    def value(self) -> int:
+    def value(self):
         return psutil.virtual_memory().available
 
     @classmethod
-    def format(cls, value: int) -> str:
+    def format(cls, value):
         magnitude = math.floor(math.log(value, cls.UNIT_SIZE))
         max_magnitude = len(cls.UNITS) - 1
         magnitude = min(magnitude, max_magnitude)
@@ -94,10 +88,10 @@ class RAMAvailable(Sensor[int]):
         return "{:.1f} {}".format(scaled_value, cls.UNITS[magnitude])
 
 
-class ACStatus(Sensor[Optional[bool]]):
+class ACStatus(Sensor):
     title = "AC Connected"
 
-    def value(self) -> Optional[bool]:
+    def value(self):
         battery = psutil.sensors_battery()
         if battery is not None:
             return battery.power_plugged
@@ -105,7 +99,7 @@ class ACStatus(Sensor[Optional[bool]]):
             return None
 
     @classmethod
-    def format(cls, value: Optional[bool]) -> str:
+    def format(cls, value):
         if value is None:
             return "Unknown"
         elif value:
@@ -114,10 +108,10 @@ class ACStatus(Sensor[Optional[bool]]):
             return "Not connected"
 
 
-class Temperature(Sensor[Optional[float]]):
+class Temperature(Sensor):
     title = "Ambient Temperature"
 
-    def value(self) -> Optional[float]:
+    def value(self):
         try:
             # Connect to a DHT22 on pin 4
             from adafruit_dht import DHT22
@@ -133,24 +127,24 @@ class Temperature(Sensor[Optional[float]]):
             return None
 
     @staticmethod
-    def celsius_to_fahrenheit(value: float) -> float:
+    def celsius_to_fahrenheit(value):
         return value * 9 / 5 + 32
 
     @classmethod
-    def format(cls, value: Optional[float]) -> str:
+    def format(cls, value):
         if value is None:
             return "Unknown"
         else:
             return "{:.1f}C ({:.1f}F)".format(value, cls.celsius_to_fahrenheit(value))
 
-    def __str__(self) -> str:
+    def __str__(self):
         return self.format(self.value())
 
 
-class RelativeHumidity(Sensor[Optional[float]]):
+class RelativeHumidity(Sensor):
     title = "Relative Humidity"
 
-    def value(self) -> Optional[float]:
+    def value(self):
         try:
             # Connect to a DHT22 on pin 4
             from adafruit_dht import DHT22
@@ -166,14 +160,14 @@ class RelativeHumidity(Sensor[Optional[float]]):
             return None
 
     @classmethod
-    def format(cls, value: Optional[float]) -> str:
+    def format(cls, value):
         if value is None:
             return "Unknown"
         else:
             return "{:.1%}".format(value)
 
 
-def get_sensors() -> Iterable[Sensor[Any]]:
+def get_sensors():
     return [
         PythonVersion(),
         IPAddresses(),
@@ -186,7 +180,7 @@ def get_sensors() -> Iterable[Sensor[Any]]:
 
 
 @click.command(help="Displays the values of the sensors")
-def show_sensors() -> None:
+def show_sensors():
     sensors = get_sensors()
     for sensor in sensors:
         click.secho(sensor.title, bold=True)
