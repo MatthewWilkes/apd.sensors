@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "34faaa40acc9d73922634e8c6bef3e8cdeffc6728a1c907283b70297d90b514b"
+            "sha256": "b5f132c374a0a891097a70c6f3be719ec794dec7b855ed5f0ed9adad4d72b0e7"
         },
         "pipfile-spec": 6,
         "requires": {},
@@ -34,6 +34,15 @@
             ],
             "version": "==7.1.1"
         },
+        "pint": {
+            "hashes": [
+                "sha256:308f1070500e102f83b6adfca6db53debfce2ffc5d3cbe3f6c367da359b5cf4d",
+                "sha256:5690c85948dfb283382aa73357c3d5a333e8c7d818be7d8643db18e07597dd99",
+                "sha256:833ec1b2561a29dd5ab316825924ec2ce64dc7d69ab09505cd1bea7709c8f0f8"
+            ],
+            "index": "pypi",
+            "version": "==0.11"
+        },
         "psutil": {
             "hashes": [
                 "sha256:002bd856770037221256765a472f50d677074ad207276a39e2bccdb7394e333b",
@@ -52,6 +61,14 @@
                 "sha256:f3e7f183162622eae9fbdee44ff19b226edec68b94ae7cba47f9afcf4c3ec66c"
             ],
             "version": "==5.7.0"
+        },
+        "waitress": {
+            "hashes": [
+                "sha256:045b3efc3d97c93362173ab1dfc159b52cfa22b46c3334ffc805dbdbf0e4309e",
+                "sha256:77ff3f3226931a1d7d8624c5371de07c8e90c7e5d80c5cc660d72659aaf23f38"
+            ],
+            "index": "pypi",
+            "version": "==1.4.3"
         }
     },
     "develop": {
@@ -520,6 +537,15 @@
             ],
             "version": "==0.7.5"
         },
+        "pint": {
+            "hashes": [
+                "sha256:308f1070500e102f83b6adfca6db53debfce2ffc5d3cbe3f6c367da359b5cf4d",
+                "sha256:5690c85948dfb283382aa73357c3d5a333e8c7d818be7d8643db18e07597dd99",
+                "sha256:833ec1b2561a29dd5ab316825924ec2ce64dc7d69ab09505cd1bea7709c8f0f8"
+            ],
+            "index": "pypi",
+            "version": "==0.11"
+        },
         "pkginfo": {
             "hashes": [
                 "sha256:7424f2c8511c186cd5424bbf31045b77435b37a8d604990b79d4e70d741148bb",
@@ -941,6 +967,7 @@
                 "sha256:045b3efc3d97c93362173ab1dfc159b52cfa22b46c3334ffc805dbdbf0e4309e",
                 "sha256:77ff3f3226931a1d7d8624c5371de07c8e90c7e5d80c5cc660d72659aaf23f38"
             ],
+            "index": "pypi",
             "version": "==1.4.3"
         },
         "wcwidth": {
