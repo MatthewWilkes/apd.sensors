@@ -146,10 +146,12 @@ class Temperature(Sensor[Optional[Any]]):
         if value is None:
             return "Unknown"
         else:
-            return "{:.3~P} ({:.3~P})".format(value, value.to(ureg.fahrenheit))
+            return "{:.3~P} ({:.3~P})".format(
+                value.to(ureg.celsius), value.to(ureg.fahrenheit)
+            )
 
     def serialize(self, value: Optional[Any]) -> str:
-        if value:
+        if value is not None:
             return json.dumps({"magnitude": value.magnitude, "unit": str(value.units)})
         else:
             return json.dumps(None)

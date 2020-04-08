@@ -40,11 +40,6 @@ class TestACStatusValue:
         assert subject() is True
         assert sensors_battery.call_count == 1
 
-    def test_sensor_but_battery_unknown(self, subject, sensors_battery):
-        sensors_battery.return_value.power_plugged = None
-        assert subject() is None
-        assert sensors_battery.call_count == 1
-
     def test_no_sensor(self, subject, sensors_battery):
         sensors_battery.return_value = None
         assert subject() is None

@@ -1,5 +1,5 @@
+import json
 import os
-import uuid
 
 import pytest
 from webtest import TestApp
@@ -8,18 +8,18 @@ from apd.sensors.wsgi import app, set_up_config
 from apd.sensors.sensors import PythonVersion
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def api_key():
-    return uuid.uuid4().hex
+    return "API key"
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def subject(api_key):
     set_up_config({"APD_SENSORS_API_KEY": api_key})
     return app
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture
 def api_server(subject):
     return TestApp(subject)
 
@@ -61,4 +61,4 @@ def test_sensor_values_returned_as_json(api_server, api_key):
 
     sensor_names = value.keys()
     assert "Python Version" in sensor_names
-    assert value["Python Version"] == list(python_version)
+    assert json.loads(value["Python Version"]) == list(python_version)
