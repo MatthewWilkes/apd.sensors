@@ -26,7 +26,7 @@ sqlalchemy-stubs = "*"
 apd-sensors = {editable = true,extras = ["scheduled", "webapp", "storedapi"],path = "."}
 apd-sunnyboy-solar = {editable = true,path = "./plugins/apd.sunnyboy_solar"}
 waitress = "*"
-pint = "==0.9"
+pint = "==0.10.1"
 
 [requires]
 
