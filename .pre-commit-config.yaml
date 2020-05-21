@@ -15,8 +15,9 @@ repos:
         (.*)/setup.py
       )$
     entry: pipenv run mypy
-    args: ["--follow-imports=skip"]
+    args: ["--namespace-packages", "-p", "apd.sensors"]
     language: system
+    pass_filenames: false
     types: [python]
 
   - id: flake8
