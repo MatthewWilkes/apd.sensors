@@ -1,4 +1,5 @@
 import datetime
+import logging
 import typing as t
 
 import flask
@@ -10,6 +11,7 @@ from apd.sensors.exceptions import DataCollectionError
 from .base import require_api_key
 
 version = flask.Blueprint(__name__, __name__)
+logger = logging.getLogger(__name__)
 
 
 @version.route("/sensors/")
@@ -26,12 +28,20 @@ def sensor_values(sensor_id=None):
         try:
             try:
                 value = sensor.value()
-            except DataCollectionError as err:
+            except Exception as err:
+                if isinstance(err, DataCollectionError):
+                    # We allow data collection errors
+                    message = str(err)
+                else:
+                    # Other errors shouldn't be published, but should be logged
+                    # Don't refuse to service the request in this case
+                    message = "Unhandled error"
+                    logger.error(f"Unhandled error while handling {sensor.name}")
                 error = {
                     "id": sensor.name,
                     "title": sensor.title,
                     "collected_at": now.isoformat(),
-                    "error": str(err),
+                    "error": message,
                 }
                 errors.append(error)
                 continue
