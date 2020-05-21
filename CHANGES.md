@@ -1,5 +1,9 @@
 ## Changes
 
+### 2.2.1 (2020-05-21)
+
+* Unexpected errors from sensors should not cause a 500 error in the v3 API (Matthew Wilkes)
+
 ### 2.2 (2020-01-17)
 
 * Add ability to store data points on query (Matthew Wilkes)
