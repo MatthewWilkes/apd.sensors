@@ -68,7 +68,7 @@ def historical_values(
 ) -> t.Tuple[t.Dict[str, t.Any], int, t.Dict[str, str]]:
     try:
         import dateutil.parser
-        from apd.sensors.database import sensor_values
+        from apd.sensors.database import sensor_values as sensor_values_table
         from apd.sensors.wsgi import db
     except ImportError:
         return {"error": "Historical data support is not installed"}, 501, {}
@@ -76,15 +76,15 @@ def historical_values(
     db_session = db.session
     headers = {"Content-Security-Policy": "default-src 'none'"}
 
-    query = db_session.query(sensor_values)
+    query = db_session.query(sensor_values_table)
     if start:
         start_dt = dateutil.parser.parse(start)
-        query = query.filter(sensor_values.c.collected_at >= start_dt)
+        query = query.filter(sensor_values_table.c.collected_at >= start_dt)
     else:
         start_dt = dateutil.parser.parse("1900-01-01")
     if end:
         end_dt = dateutil.parser.parse(end)
-        query = query.filter(sensor_values.c.collected_at <= end_dt)
+        query = query.filter(sensor_values_table.c.collected_at <= end_dt)
     else:
         end_dt = datetime.datetime.now()
 

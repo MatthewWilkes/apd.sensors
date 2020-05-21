@@ -8,7 +8,7 @@ import typing as t
 import click
 
 from .database import store_sensor_data
-from .sensors import Sensor
+from .base import Sensor
 from .exceptions import DataCollectionError, UserFacingCLIError
 
 

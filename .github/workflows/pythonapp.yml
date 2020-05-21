@@ -30,6 +30,9 @@ jobs:
     - name: Lint with black
       run: |
         pipenv run black --check
+    - name: Lint with mypy
+      run: |
+        pipenv run mypy --namespace-packages -p apd.sensors
     - name: Test with pytest
       run: |
         pipenv run pytest
