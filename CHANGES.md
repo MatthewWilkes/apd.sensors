@@ -1,5 +1,9 @@
 ## Changes
 
+### 2.2.2 (2020-05-21)
+
+* Fix import bug that required the storage extra to be installed (Matthew Wilkes)
+
 ### 2.2.1 (2020-05-21)
 
 * Unexpected errors from sensors should not cause a 500 error in the v3 API (Matthew Wilkes)

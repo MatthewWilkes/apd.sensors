@@ -7,7 +7,6 @@ import typing as t
 
 import click
 
-from .database import store_sensor_data
 from .base import Sensor
 from .exceptions import DataCollectionError, UserFacingCLIError
 
@@ -91,6 +90,7 @@ def show_sensors(develop, verbose, save, db):
     if save:
         from sqlalchemy import create_engine
         from sqlalchemy.orm import sessionmaker
+        from .database import store_sensor_data
 
         engine = create_engine(db)
         sm = sessionmaker(engine)
