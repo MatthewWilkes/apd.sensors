@@ -29,13 +29,15 @@ def get_sensor_by_path(sensor_path: str) -> Sensor[t.Any]:
         module = importlib.import_module(module_name)
     except ImportError as err:
         raise UserFacingCLIError(
-            f"Could not import module {module_name}", return_code=ReturnCodes.BAD_SENSOR_PATH
+            f"Could not import module {module_name}",
+            return_code=ReturnCodes.BAD_SENSOR_PATH,
         ) from err
     try:
         sensor_class = getattr(module, sensor_name)
     except AttributeError as err:
         raise UserFacingCLIError(
-            f"Could not find attribute {sensor_name} in {module_name}", return_code=ReturnCodes.BAD_SENSOR_PATH
+            f"Could not find attribute {sensor_name} in {module_name}",
+            return_code=ReturnCodes.BAD_SENSOR_PATH,
         ) from err
     if (
         isinstance(sensor_class, type)

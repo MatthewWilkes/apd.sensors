@@ -43,13 +43,21 @@ class TestTemperatureSerializer:
         return ureg.Quantity(magnitude, "degree_Celsius")
 
     def test_serialize_21c(self, serialize):
-        assert serialize(self.to_degc(21.0)) == {"magnitude": 21.0, "unit": "degree_Celsius"}
+        assert serialize(self.to_degc(21.0)) == {
+            "magnitude": 21.0,
+            "unit": "degree_Celsius",
+        }
 
     def test_serialize_negative(self, serialize):
-        assert serialize(self.to_degc(-32.3)) == {"magnitude": -32.3, "unit": "degree_Celsius"}
+        assert serialize(self.to_degc(-32.3)) == {
+            "magnitude": -32.3,
+            "unit": "degree_Celsius",
+        }
 
     def test_deserialize_21c(self, deserialize):
-        assert deserialize({"magnitude": 21.0, "unit": "degree_Celsius"}) == self.to_degc(21.0)
+        assert deserialize(
+            {"magnitude": 21.0, "unit": "degree_Celsius"}
+        ) == self.to_degc(21.0)
 
 
 class TestHumidityFormatter:
