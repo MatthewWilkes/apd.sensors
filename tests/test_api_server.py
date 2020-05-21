@@ -330,3 +330,28 @@ class Testv30API(CommonTests):
             sensor for sensor in sensors if sensor["id"] == "PythonVersion"
         ]
         assert len(python_version) == 1
+
+    @pytest.mark.functional
+    def test_unhandled_erroring_sensor_excluded_but_reported(self, api_server, api_key):
+        from .test_utils import FailingSensor
+
+        with mock.patch("apd.sensors.cli.get_sensors") as get_sensors:
+            # Ensure failing sensor is first, to test that subsequent sensors
+            # are still processed
+            get_sensors.return_value = [
+                FailingSensor(2, exception_type=ValueError),
+                PythonVersion(),
+            ]
+            value = api_server.get("/sensors/", headers={"X-API-Key": api_key}).json
+
+        sensors = value["sensors"]
+        failing_values = [
+            sensor for sensor in sensors if sensor["id"] == "FailingSensor"
+        ]
+        assert len(failing_values) == 0
+        errors = value["errors"]
+        failing_errors = [
+            sensor for sensor in errors if sensor["id"] == "FailingSensor"
+        ]
+        assert len(failing_errors) == 1
+        assert failing_errors[0]["error"] == "Unhandled error"
