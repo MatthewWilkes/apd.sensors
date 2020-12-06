@@ -66,4 +66,4 @@ class TestHumidityFormatter:
         return humidity_sensor.format
 
     def test_format_percentage(self, subject):
-        assert subject(0.035) == "3.5%"
+        assert subject(3.5) == "3.5%"

@@ -186,4 +186,4 @@ class RelativeHumidity(JSONSensor[float], DHTSensor):
 
     @classmethod
     def format(cls, value: float) -> str:
-        return "{:.1%}".format(value)
+        return "{:.1%}".format(value/100.0)
