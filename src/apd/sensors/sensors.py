@@ -17,6 +17,8 @@ from .exceptions import (
 )
 
 
+dht_sensor = None
+
 class PythonVersion(JSONSensor[version_info_type]):
     name = "PythonVersion"
     title = "Python Version"
@@ -121,23 +123,23 @@ class DHTSensor:
 
     @property
     def sensor(self) -> t.Any:
-        try:
-            import adafruit_dht
-            import board
+        global dht_sensor
+        if dht_sensor is None:
+            try:
+                import adafruit_dht
+                import board
 
-            # Force using legacy interface
-            adafruit_dht._USE_PULSEIO = False
-
-            sensor_type = getattr(adafruit_dht, self.board)
-            pin = getattr(board, self.pin)
-            return sensor_type(pin)
-        except (ImportError, NotImplementedError, AttributeError) as err:
-            # No DHT library results in an ImportError.
-            # Running on an unknown platform results in a
-            # NotImplementedError when getting the pin
-            raise PersistentSensorFailureError(
-                "Unable to initialise sensor interface"
-            ) from err
+                sensor_type = getattr(adafruit_dht, self.board)
+                pin = getattr(board, self.pin)
+                dht_sensor = sensor_type(pin)
+            except (ImportError, NotImplementedError, AttributeError) as err:
+                # No DHT library results in an ImportError.
+                # Running on an unknown platform results in a
+                # NotImplementedError when getting the pin
+                raise PersistentSensorFailureError(
+                    "Unable to initialise sensor interface"
+                ) from err
+        return dht_sensor
 
 
 class Temperature(Sensor[t.Any], DHTSensor):
