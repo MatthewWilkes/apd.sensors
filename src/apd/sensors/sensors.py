@@ -19,6 +19,7 @@ from .exceptions import (
 
 dht_sensor = None
 
+
 class PythonVersion(JSONSensor[version_info_type]):
     name = "PythonVersion"
     title = "Python Version"
@@ -188,4 +189,4 @@ class RelativeHumidity(JSONSensor[float], DHTSensor):
 
     @classmethod
     def format(cls, value: float) -> str:
-        return "{:.1%}".format(value/100.0)
+        return "{:.1%}".format(value / 100.0)
